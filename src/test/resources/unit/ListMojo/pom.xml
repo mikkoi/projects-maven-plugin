@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.github.mikkoi</groupId>
+    <artifactId>projects-maven-plugin</artifactId>
+    <version>@project.version@</version>
+    <packaging>pom</packaging>
+    <name>Projects Maven Plugin - Integration Test</name>
+    <description>Integration Test.</description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <java.version>@java.version@</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <maven.compiler.testSource>${java.version}</maven.compiler.testSource>
+        <maven.compiler.testTarget>${java.version}</maven.compiler.testTarget>
+        <maven.compiler.debug>true</maven.compiler.debug>
+
+        <!-- Plugins -->
+
+        <!-- Dependencies -->
+        <org.junit.jupiter.version>@org.junit.jupiter.version@</org.junit.jupiter.version>
+        <itf.version>@itf.version@</itf.version>
+        <org.assertj.version>@org.assertj.version@</org.assertj.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Integration Testing Framework Extension -->
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${org.assertj.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.soebes.itf.jupiter.extension</groupId>
+                <artifactId>itf-assertj</artifactId>
+                <version>${itf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-engine</artifactId>
+                <version>${org.junit.jupiter.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.soebes.itf.jupiter.extension</groupId>
+                <artifactId>itf-jupiter-extension</artifactId>
+                <version>${itf.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- https://github.com/khmarbaise/maven-it-extension -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+<!--        <pluginManagement>-->
+<!--            <plugins>-->
+<!--                <plugin>-->
+<!--                    <groupId>com.github.mikkoi</groupId>-->
+<!--                    <artifactId>projects-maven-plugin</artifactId>-->
+<!--                    <version>@project.version@</version>-->
+<!--                </plugin>-->
+<!--            </plugins>-->
+<!--        </pluginManagement>-->
+
+        <plugins>
+            <plugin>
+<!--                <groupId>com.github.mikkoi</groupId>-->
+                <artifactId>projects-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>projects-list</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>list</goal>
+                        </goals>
+                        <configuration>
+                            <runOnlyAtExecutionRoot>false</runOnlyAtExecutionRoot>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <runOnlyAtExecutionRoot>false</runOnlyAtExecutionRoot>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
