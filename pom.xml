@@ -426,6 +426,9 @@
                     <systemPropertyVariables>
                         <maven.version>${maven.version}</maven.version>
                         <maven.home>${maven.home}</maven.home>
+                        <project.version>${project.version}</project.version>
+                        <project.artifactId>${project.artifactId}</project.artifactId>
+                        <project.groupId>${project.groupId}</project.groupId>
                     </systemPropertyVariables>
                     <properties>
                         <configurationParameters>
@@ -500,10 +503,6 @@
 <!--            &lt;!&ndash;            </testResource>&ndash;&gt;-->
 <!--            <testResource>-->
 <!--                <directory>src/test/resources/unit</directory>-->
-<!--                <filtering>true</filtering>-->
-<!--            </testResource>-->
-<!--            <testResource>-->
-<!--                <directory>src/test/resources-its</directory>-->
 <!--                <filtering>true</filtering>-->
 <!--            </testResource>-->
 <!--        </testResources>-->
