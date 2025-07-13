@@ -1,7 +1,5 @@
 package com.github.mikkoi.maven.plugin.projects;
 
-import org.apache.maven.execution.MavenSession;
-import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
@@ -17,35 +15,7 @@ import java.util.function.Predicate;
  * add-dependencies -Dincludes -Dexcludes
  */
 @Mojo(name = "list")
-public class ListMojo extends AbstractMojo {
-
-    @Parameter(defaultValue = "${session}", readonly = true, required = true)
-    private MavenSession mavenSession;
-
-    /**
-     * Skip execution
-     */
-    @Parameter(property = "projects" + ".list" + ".skip", defaultValue = "false", alias = "skip")
-    private boolean skip;
-
-    /**
-     * Force output to STDOUT instead of using [INFO] logging level.
-     */
-    @Parameter(property = "projects" + ".list" + ".forceStdout", defaultValue = "false", alias = "forceStdoutTwo")
-    private boolean forceStdout;
-
-    /**
-     * Run only in the project which is at execution root, i.e. the dir in which `mvn` is executed.
-     */
-    @Parameter(property = "projects" + ".list" + ".runOnlyAtExecutionRoot", defaultValue = "true")
-    private boolean runOnlyAtExecutionRoot;
-
-    /**
-     * Include by project [groupId:]artifactId.
-     * Default value: all projects included.
-     */
-    @Parameter(property = "projects" + ".list" + ".includes")
-    private List<String> includes;
+public class ListMojo extends BaseMojo {
 
     /**
      * Exclude by project [groupId:]artifactId.
@@ -54,14 +24,18 @@ public class ListMojo extends AbstractMojo {
      * Then excludes are excluded from them.
      */
     @Parameter(property = "projects" + ".list" + ".excludes")
-    private List<String> excludes;
-
+    List<String> excludes;
     /**
      * Sorting order: maven | alphabetic, default: maven
      */
     @Parameter(property = "projects" + ".list" + ".sortOrder", defaultValue = "maven")
-    private String sortOrder;
-
+    String sortOrder;
+    /**
+     * Include by project [groupId:]artifactId.
+     * Default value: all projects included.
+     */
+    @Parameter(property = "projects" + ".list" + ".includes")
+    private List<String> includes;
     /**
      * Format for printing.
      */
@@ -174,7 +148,7 @@ public class ListMojo extends AbstractMojo {
         final List<MavenProject> projects = mavenSession.getProjects();
         final List<String> outRows = this.list(projects);
         outRows.forEach(row -> {
-            if(this.forceStdout) {
+            if (this.forceStdout) {
                 System.out.println(row);
             } else {
                 getLog().info(row);
@@ -225,21 +199,6 @@ public class ListMojo extends AbstractMojo {
         });
         getLog().debug(":End of projects");
         return rows;
-    }
-
-    /**
-     * Is this project the last project in the reactor?
-     *
-     * @return true if last project (including only project when only one project)
-     */
-    private boolean isLastProjectInReactor(MavenSession mavenSession) {
-        List<MavenProject> sortedProjects = mavenSession.getProjectDependencyGraph().getSortedProjects();
-        MavenProject lastProject = sortedProjects.isEmpty() ? mavenSession.getCurrentProject() : sortedProjects.get(sortedProjects.size() - 1);
-        // : sortedProjects.getLast();
-        if (getLog().isDebugEnabled()) {
-            getLog().debug("Current project: '" + mavenSession.getCurrentProject().getName() + "', Last project to execute based on dependency graph: '" + lastProject.getName() + "'");
-        }
-        return mavenSession.getCurrentProject().equals(lastProject);
     }
 
 }
