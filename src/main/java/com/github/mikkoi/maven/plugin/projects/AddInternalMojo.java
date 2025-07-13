@@ -1,5 +1,6 @@
 package com.github.mikkoi.maven.plugin.projects;
 
+import org.apache.maven.model.Dependency;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
@@ -10,12 +11,14 @@ import java.util.List;
 import java.util.function.Predicate;
 
 /**
- * list -Dincludes -Dexcludes -Dorder=random|alphabetic (traversal order) -Dformat="%groupId:%artifactId:%type"
- * tree -Dincludes -Dexcludes -Dindent=4
- * add-dependencies -Dincludes -Dexcludes
+ * Add one or more dependencies into the project.
+ * These must be artifacts from the same root project.
+ * This goal can be used to, for example, dynamically add all subprojects
+ * as dependencies for
+ * <a href="https://www.eclemma.org/jacoco/trunk/doc/report-aggregate-mojo.html">Jacoco report-aggregate goal</a>.
  */
-@Mojo(name = "list")
-public class ListMojo extends BaseMojo {
+@Mojo(name = "add-internal")
+public class AddInternalMojo extends BaseMojo {
 
     /**
      * Exclude by project [groupId:]artifactId.
@@ -23,26 +26,33 @@ public class ListMojo extends BaseMojo {
      * If includes list contains any items, they are evaluated first.
      * Then excludes are excluded from them.
      */
-    @Parameter(property = "projects" + ".list" + ".excludes")
+    @Parameter(property = "projects" + ".addInternal" + ".excludes")
     List<String> excludes;
 
     /**
      * Include by project [groupId:]artifactId.
      * Default value: all projects included.
      */
-    @Parameter(property = "projects" + ".list" + ".includes")
+    @Parameter(property = "projects" + ".addInternal" + ".includes")
     private List<String> includes;
+
+    /**
+     * Error if unknown project in includes/excludes.
+     * If a wildcard (*) is used in the name, this parameter has no effect.
+     */
+    @Parameter(property = "projects" + ".errorIfUnknownProject", defaultValue = "true")
+    private boolean errorIfUnknownProject;
 
     /**
      * Sorting order: maven | alphabetic, default: maven
      */
-    @Parameter(property = "projects" + ".list" + ".sortOrder", defaultValue = "maven")
+    @Parameter(property = "projects" + ".addInternal" + ".sortOrder", defaultValue = "maven")
     String sortOrder;
 
     /**
      * Format for printing.
      */
-    @Parameter(property = "projects" + ".list" + ".printFormat", defaultValue = "{groupId}:{artifactId}")
+    @Parameter(property = "projects" + ".addInternal" + ".printFormat", defaultValue = "{groupId}:{artifactId}")
     private String printFormat;
 
     /**
@@ -53,20 +63,19 @@ public class ListMojo extends BaseMojo {
         if (this.skip) {
             return;
         }
-        MavenProject currentProject = this.mavenSession.getCurrentProject();
-        getLog().debug(String.format("Current Project: %s:%s", currentProject.getGroupId(), currentProject.getArtifactId()));
-        MavenProject topLevelProject = this.mavenSession.getTopLevelProject();
-        getLog().debug(String.format("Top Level Project: %s:%s", topLevelProject.getGroupId(), topLevelProject.getArtifactId()));
-
         validateParameters();
 
-        if (runOnlyAtExecutionRoot && !isLastProjectInReactor(this.mavenSession)) {
-            return;
-        }
+//        if (runOnlyAtExecutionRoot && !isLastProjectInReactor(this.mavenSession)) {
+//            return;
+//        }
+        // if includes/excludes project artifactId and groupId are full and not found
+        // getLog().warn("Parameter validation: Include project ** not found.")
+        // or MojoExecutionException
 
         final List<MavenProject> projects = mavenSession.getProjects();
+        final List<String> outRows = addInternal(projects);
 
-        printOut(this.list(projects));
+        printOut(outRows);
     }
 
     /**
@@ -76,26 +85,63 @@ public class ListMojo extends BaseMojo {
     private void validateParameters() {
         getLog().debug("includes=" + includes.toString());
         getLog().debug("excludes=" + excludes.toString());
-
-//        excludes.stream().forEach( a -> {
-//            if(a == null) {
-//                throw MojoExecutionException(a, "Failure in parameter", "Failure in parameter excludes. String is null");
     }
 
     /**
-     * Convert list of projects to a list of strings.
+     * Add internal projects to the current project's dependencies.
      *
-     * @param projects   List<MavenProject>
-     * @return String    List<String>, List of strings ready for writing out.
+     * @param projects      List<MavenProject>
+     * @return strings      List of strings ready for writing out
      */
-    public List<String> list(List<MavenProject> projects) {
-        getLog().debug("Begin of projects:");
-        Comparator<MavenProject> comparator = getMavenProjectComparator(this.sortOrder);
+    public List<String> addInternal(List<MavenProject> projects) {
+        getLog().debug("Begin of projects:add-internal");
+//        Comparator<MavenProject> comparator = getMavenProjectComparator(this.sortOrder);
         List<String> rows = new ArrayList<>();
-        projects.stream().filter(this::isIncluded).sorted(comparator).forEach(mavenProject -> {
-            rows.add(formatProject(mavenProject));
+//        projects.stream().filter(this::isIncluded).sorted(comparator).forEach(mavenProject -> {
+//            rows.add(formatProject(mavenProject));
+//        });
+        MavenProject currentProject = this.mavenSession.getCurrentProject();
+        getLog().debug(String.format("Current Project: %s:%s", currentProject.getGroupId(), currentProject.getArtifactId()));
+
+        getLog().debug("Iterate through all projects in Maven Dependency Graph, i.e. the build.");
+        mavenSession.getProjectDependencyGraph().getSortedProjects().forEach(project -> {
+            getLog().debug(String.format("    %s:%s:%s",
+                    project.getGroupId(),
+                    project.getArtifactId(),
+                    project.getVersion()
+            ));
+            if(!project.getArtifactId().equals(currentProject.getArtifactId()) && isIncluded(project)) {
+                Dependency dependency = new Dependency();
+                dependency.setGroupId(project.getGroupId());
+                dependency.setArtifactId(project.getArtifactId());
+                dependency.setVersion(project.getVersion());
+                dependency.setScope("compile");
+                @SuppressWarnings("unchecked") List<Dependency> currentProjectDependencies = currentProject.getDependencies();
+                currentProjectDependencies.add(dependency);
+//                new MarkupBuilder(xmlWriter).dependency {
+//                    groupId(dependencyProject.getGroupId())
+//                    artifactId(dependencyProject.getArtifactId())
+//                    version(dependencyProject.getVersion())
+//                }
+//                xmlWriter.write("\n")
+                getLog().info(String.format("Add dependency %s:%s:%s to project %s",
+                        project.getGroupId(),
+                        project.getArtifactId(),
+                        project.getVersion(),
+                        currentProject.getId()
+                ));
+            }
         });
-        getLog().debug(":End of projects");
+        getLog().debug("End of iterate");
+
+//        Files.createDirectories(Paths.get(project.getBuild().getDirectory()))
+//        def String dependenciesFilePath = project.getBuild().getDirectory() + "/dependencies.xml"
+//        log.info("Dependencies list written in {}", dependenciesFilePath)
+//        def file = new File(dependenciesFilePath)
+//        file.createNewFile()
+//        file.text=xmlWriter
+//                                    ]]></source>
+        getLog().debug(":End of projects:add-internal");
         return rows;
     }
 
@@ -133,6 +179,7 @@ public class ListMojo extends BaseMojo {
 
     /**
      * Convert string for matching.
+     * Prepare string for use with Java's regexp libraries.
      *
      * @param s String
      * @return converted string
@@ -204,9 +251,9 @@ public class ListMojo extends BaseMojo {
         } else if (this.includes.isEmpty()) {  // && ! this.excludes.isEmpty()
             return this.excludes.stream().noneMatch(predicateForProjectId);
         } else if (this.excludes.isEmpty()) {  // && !this.includes.isEmpty()
-            return true;
+            return this.includes.stream().anyMatch(predicateForProjectId);
         } else {
-            return true;
+            return this.includes.stream().anyMatch(predicateForProjectId) && this.excludes.stream().noneMatch(predicateForProjectId);
         }
     }
 

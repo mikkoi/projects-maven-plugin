@@ -130,7 +130,7 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <id>project-helper-sayhi</id>
+                        <id>projects-greet</id>
                         <phase>validate</phase>
                         <goals>
                             <goal>greet</goal>

@@ -31,11 +31,22 @@ public abstract class BaseMojo extends AbstractMojo {
     boolean runOnlyAtExecutionRoot;
 
     /**
+     * Give warning instead of error.
+     */
+    @Parameter(property = "projects" + ".errorIsWarning", defaultValue = "false")
+    boolean errorIsWarning;
+
+    /**
      * Is this project the last project in the reactor?
      *
      * @return true if last project (including only project when only one project)
      */
     boolean isLastProjectInReactor(MavenSession mavenSession) {
+        MavenProject currentProject = this.mavenSession.getCurrentProject();
+        getLog().debug(String.format("Current Project: %s:%s", currentProject.getGroupId(), currentProject.getArtifactId()));
+        MavenProject topLevelProject = this.mavenSession.getTopLevelProject();
+        getLog().debug(String.format("Top Level Project: %s:%s", topLevelProject.getGroupId(), topLevelProject.getArtifactId()));
+
         List<MavenProject> sortedProjects = mavenSession.getProjectDependencyGraph().getSortedProjects();
         MavenProject lastProject = sortedProjects.isEmpty() ? mavenSession.getCurrentProject() : sortedProjects.get(sortedProjects.size() - 1);
         // : sortedProjects.getLast();
@@ -43,6 +54,22 @@ public abstract class BaseMojo extends AbstractMojo {
             getLog().debug("Current project: '" + mavenSession.getCurrentProject().getName() + "', Last project to execute based on dependency graph: '" + lastProject.getName() + "'");
         }
         return mavenSession.getCurrentProject().equals(lastProject);
+    }
+
+    /**
+     * Print out the rows.
+     * if forceStdout is set, then print to STDOUT, otherwise use logger.
+     *
+     * @param outRows List of strings for printing.
+     */
+    void printOut(List<String> outRows) {
+        outRows.forEach(row -> {
+            if (this.forceStdout) {
+                System.out.println(row);
+            } else {
+                getLog().info(row);
+            }
+        });
     }
 
 }

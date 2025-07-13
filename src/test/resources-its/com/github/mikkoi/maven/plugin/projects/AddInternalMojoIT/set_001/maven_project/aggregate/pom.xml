@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.github.mikkoi</groupId>
+        <artifactId>projects-maven-plugin-add-internal-set-001</artifactId>
+        <version>@project.version@</version>
+    </parent>
+
+    <artifactId>projects-maven-plugin-add-internal-set-001-aggregate</artifactId>
+    <packaging>pom</packaging>
+    <name>Projects Maven Plugin - IT - set-001 - aggregate</name>
+    <description>Integration Test. Set 001 aggregate. Like Jacoco report-aggregate.</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>fourth</artifactId>
+            <version>@project.version@</version>
+            <scope>runtime</scope>
+            <type>jar</type>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>projects-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-internal</id>
+                        <goals>
+                            <goal>add-internal</goal>
+                        </goals>
+                        <phase>validate</phase>
+                        <configuration>
+                            <excludes>
+                                <exclude>projects-maven-plugin-add-internal-set-001</exclude>
+                                <exclude>${project.groupId}:third</exclude>
+                                <exclude>${project.groupId}:fifth</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.gmaven</groupId>
+                <artifactId>groovy-maven-plugin</artifactId>
+                <version>2.1.1</version>
+                <executions>
+                    <execution>
+                        <id>list-all-project-dependencies</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <source><![CDATA[
+                                log.info("All project dependencies:")
+                                for (dependencyProject in project.getDependencies()) {
+                                    log.info("Project {}:{}:{} has dependency {}:{}:{}",
+                                            project.groupId,
+                                            project.artifactId,
+                                            project.version,
+                                            dependencyProject.getGroupId(),
+                                            dependencyProject.getArtifactId(),
+                                            dependencyProject.getVersion()
+                                    )
+                                }
+                                ]]></source>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
