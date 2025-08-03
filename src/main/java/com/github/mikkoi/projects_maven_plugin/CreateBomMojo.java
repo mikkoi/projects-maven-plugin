@@ -134,9 +134,9 @@ public class CreateBomMojo extends BaseMojo {
         MavenProject topLevelProject = this.mavenSession.getTopLevelProject();
         getLog().debug(String.format("Top Level Project: %s:%s", topLevelProject.getGroupId(), topLevelProject.getArtifactId()));
 
-        if (runOnlyAtExecutionRoot && !isLastProjectInReactor(this.mavenSession)) {
-            return;
-        }
+//        if (runOnlyAtExecutionRoot && !isLastProjectInReactor(this.mavenSession)) {
+//            return;
+//        }
 
         validateParameters();
 
@@ -201,13 +201,13 @@ public class CreateBomMojo extends BaseMojo {
         model.setParent(null);
 
         // Add new details where available
-        if(!this.bomGroupId.isEmpty()) {
+        if(this.bomGroupId != null && !this.bomGroupId.isEmpty()) {
             model.setGroupId(this.bomGroupId);
         }
-        if(!this.bomArtifactId.isEmpty()) {
+        if(this.bomArtifactId != null && this.bomArtifactId.isEmpty()) {
             model.setGroupId(this.bomArtifactId);
         }
-        if(!this.bomVersion.isEmpty()) {
+        if(this.bomVersion != null && this.bomVersion.isEmpty()) {
             model.setGroupId(this.bomVersion);
         }
 
