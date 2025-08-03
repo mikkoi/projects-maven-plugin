@@ -10,9 +10,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 /**
- * list -Dincludes -Dexcludes -Dorder=random|alphabetic (traversal order) -Dformat="%groupId:%artifactId:%type"
- * tree -Dincludes -Dexcludes -Dindent=4
- * add-dependencies -Dincludes -Dexcludes
+ * List all projects in the build.
  */
 @Mojo(name = "list")
 public class ListMojo extends BaseMojo {
