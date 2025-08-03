@@ -45,6 +45,10 @@ public class AddInternalMojoIT {
             assertThat(result).out().info().contains(String.format("Project %s:projects-maven-plugin-add-internal-set-001-aggregate:%s has dependency %s:fourth:%s", g, v, g, v));
             assertThat(result).out().info().contains(String.format("Project %s:projects-maven-plugin-add-internal-set-001-aggregate:%s has dependency %s:other:%s", g, v, g, v));
             assertThat(result).out().info().contains(String.format("Project %s:projects-maven-plugin-add-internal-set-001-aggregate:%s has dependency %s:second:%s", g, v, g, v));
+            assertThat(result).out().info().doesNotContain(String.format("Project %s:projects-maven-plugin-add-internal-set-001-aggregate:%s has dependency %s:third:%s", g, v, g, v));
+            assertThat(result).out().info().doesNotContain(String.format("Project %s:projects-maven-plugin-add-internal-set-001-aggregate:%s has dependency %s:fifth:%s", g, v, g, v));
+            assertThat(result).out().info().doesNotContain(String.format("Project %s:projects-maven-plugin-add-internal-set-001-aggregate:%s has dependency %s:projects-maven-plugin-add-internal-set-001-aggregate:%s", g, v, g, v));
+            assertThat(result).out().info().doesNotContain(String.format("Project %s:projects-maven-plugin-add-internal-set-001-aggregate:%s has dependency %s:projects-maven-plugin-add-internal-set-001:%s", g, v, g, v));
             //assertThat(result).out().warn().contains("");
         }
     }

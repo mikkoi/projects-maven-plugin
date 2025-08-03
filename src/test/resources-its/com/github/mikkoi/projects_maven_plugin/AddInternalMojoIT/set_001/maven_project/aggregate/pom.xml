@@ -38,7 +38,7 @@
                         <phase>validate</phase>
                         <configuration>
                             <excludes>
-                                <exclude>projects-maven-plugin-add-internal-set-001</exclude>
+                                <exclude>projects-maven-plugin-add-internal-set-001</exclude><!-- root -->
                                 <exclude>${project.groupId}:third</exclude>
                                 <exclude>${project.groupId}:fifth</exclude>
                             </excludes>
