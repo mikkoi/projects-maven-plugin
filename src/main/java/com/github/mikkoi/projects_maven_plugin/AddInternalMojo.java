@@ -21,6 +21,12 @@ import java.util.function.Predicate;
 public class AddInternalMojo extends BaseMojo {
 
     /**
+     * Skip execution
+     */
+    @Parameter(property = "projects" + ".addInternal" + ".skip", defaultValue = "false", alias = "skip")
+    boolean thisMojoSkip;
+
+    /**
      * Exclude by project [groupId:]artifactId.
      * Default value: No projects excluded.
      * If includes list contains any items, they are evaluated first.
@@ -60,7 +66,7 @@ public class AddInternalMojo extends BaseMojo {
      */
     @Override
     public void execute() {
-        if (this.skip) {
+        if (this.skip || this.thisMojoSkip) {
             return;
         }
         validateParameters();
