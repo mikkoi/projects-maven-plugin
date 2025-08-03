@@ -170,6 +170,9 @@ public class CreateBomMojo extends BaseMojo {
         model.getProfiles().clear();
         model.setPrerequisites(null);
         model.setRepositories(null);
+        model.setProperties(null);
+        model.setReporting(null);
+        model.setParent(null);
 
         // Clear dependencyManagement and fill it with all projects in the build.
         model.getDependencyManagement().getDependencies().clear();
@@ -192,20 +195,6 @@ public class CreateBomMojo extends BaseMojo {
         } catch (IOException e) {
             getLog().error(String.format("Cannot overwrite POM %s", pomPath), e);
         }
-
-
-//        final ModelWriter modelWriter = new DefaultModelWriter();
-////        final java.nio.file.Path backupPomPath = Paths.get(currentProject.getBasedir().getPath());
-//        final java.nio.file.Path backupPomPath = Paths.get(currentProject.getFile().getPath() + ".bak");
-//        final File backupPom = new File(orgPomFilePath);
-//        BasicFileAttributeView basicFileAttributeView = Files.get
-////        final File backupPom = Files.createFile(backupPomPath);
-//        final File orgPomFilePath = currentProject.getFile();
-////        final java.nio.file.attribute.FileAttribute<
-//        modelWriter.write(backupPom, null, currentProject.getModel());
-//        orgPomFile.createNewFile();
-//        modelWriter.write(orgPomFile, null, project.getModel());
-//        Files.createFile()
 
         getLog().debug(":End of createBom");
     }
