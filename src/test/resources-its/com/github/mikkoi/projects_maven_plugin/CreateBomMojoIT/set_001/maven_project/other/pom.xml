@@ -17,7 +17,7 @@
     </description>
 
     <modules>
-        <module>second</module>
+        <module>other-second</module>
     </modules>
 
     <properties>

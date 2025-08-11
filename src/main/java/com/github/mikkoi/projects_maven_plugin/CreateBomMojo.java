@@ -79,6 +79,7 @@ public class CreateBomMojo extends BaseMojo {
     @Parameter(property = "projects" + ".createBom" + ".errorDependencyConvergence", alias = "errorDependencyConvergence", defaultValue = "true")
     boolean errorDependencyConvergence;
 
+    private List<String> includes;
     /**
      * Include by project [groupId:]artifactId.
      * Default value: all projects included.
@@ -86,14 +87,19 @@ public class CreateBomMojo extends BaseMojo {
      * Then excludes are excluded from them.
      */
     @Parameter(property = "projects" + ".createBom" + ".includes")
-    private List<String> includes;
+    public void setIncludes(List<String> includes) {
+        this.includes = includes;
+    }
 
+    List<String> excludes;
     /**
      * Exclude by project [groupId:]artifactId.
      * Default value: No projects excluded.
      */
     @Parameter(property = "projects" + ".createBom" + ".excludes")
-    List<String> excludes;
+    public void setExcludes(List<String> excludes) {
+        this.excludes = excludes;
+    }
 
     /**
      * Sorting order: maven | alphabetic, default: maven
@@ -105,7 +111,7 @@ public class CreateBomMojo extends BaseMojo {
      * Validate parameters provided via properties
      * either on the command line or using configuration element in pom.
      */
-    private void validateParameters() throws MojoExecutionException {
+    private void validateAndPrepareParameters() throws MojoExecutionException {
         getLog().debug("includes=" + includes.toString());
         getLog().debug("excludes=" + excludes.toString());
         getLog().debug("sortOrder=" + sortOrder);
@@ -116,23 +122,29 @@ public class CreateBomMojo extends BaseMojo {
                 throw new MojoExecutionException(includes, "Failure in parameter", "Failure in parameter 'includes'. String is null");
             }
         }
+        if (includes.isEmpty()) {
+            includes.add("*");
+        }
+
         for ( String a : excludes ) {
             if (a == null) {
                 throw new MojoExecutionException(excludes, "Failure in parameter", "Failure in parameter 'excludes'. String is null");
             }
         }
+
         if(! (sortOrder.equals("maven") || sortOrder.equals("alphabetical"))) {
             throw new MojoExecutionException(sortOrder, "Failure in parameter", "Failure in parameter 'sortOrder'. Allowed values: 'maven', 'alphabetical'.");
         }
+
         if(bomPath.equals("DEFAULT_TO_BE_REPLACED")) {
             // Replace with default: target/bom/pom.xml
             bomPath = mavenSession.getCurrentProject().getBuild().getDirectory() + "/bom/pom.xml";
         } else if (bomPath.isEmpty()) {
             throw new MojoExecutionException(bomPath, "Failure in parameter", "Failure in parameter 'bomPath'. String is null");
         }
+
         // Validate bomPath
         try {
-//            createDirectories(Paths.get(bomPath).toAbsolutePath());
             Files.createDirectories(Paths.get(bomPath).getParent());
         } catch (IOException e) {
             throw new MojoExecutionException(bomPath, "Failure in parameter", String.format("Failure in parameter 'bomPath'. Path '%s' not found", Paths.get(bomPath)));
@@ -183,20 +195,6 @@ public class CreateBomMojo extends BaseMojo {
             t = ".*:" + t;
         }
         return t;
-    }
-
-    /**
-     * Create directories from string
-     * @param filePath String
-     * @throws IOException failure
-     */
-    static void createDirectories(Path filePath) throws IOException {
-//        final Path path = Paths.get(filePath);
-        try {
-            Files.createDirectories(filePath);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     /**
@@ -251,9 +249,8 @@ public class CreateBomMojo extends BaseMojo {
 
         // Clear dependencyManagement and fill it with all projects in the build.
         getLog().debug(String.format("model.getDependencyManagement=%s", model.getDependencyManagement()));
-//        getLog().debug(String.format("model.getDependencyManagement.getDependencies=%s", model.getDependencyManagement().getDependencies()));
-//        model.getDependencyManagement().getDependencies().clear();
         model.setDependencyManagement(new DependencyManagement());
+
         if(includeProjects) {
             final List<MavenProject> projects = mavenSession.getProjects();
             Comparator<MavenProject> comparator = getMavenProjectComparator(this.sortOrder);
@@ -266,15 +263,6 @@ public class CreateBomMojo extends BaseMojo {
                 model.getDependencyManagement().addDependency(dependency);
             });
         }
-
-//        // Replace the current pom.xml
-//        final Path pomPath = Paths.get(currentProject.getFile().getPath());
-//        try {
-//            writePOM(pomPath, model);
-//            getLog().info(String.format("Original POM replaced in %s", pomPath));
-//        } catch (IOException e) {
-//            getLog().error(String.format("Cannot overwrite POM %s", pomPath), e);
-//        }
 
         // Save the BOM POM
         final String bomPath = this.bomPath;
@@ -295,93 +283,8 @@ public class CreateBomMojo extends BaseMojo {
 
         // Match from the end of the id, artifactId alone is enough.
         Predicate<String> predicateForProjectId = s -> projectId.matches(convertStringForMatching(s));
-        if (this.includes.isEmpty() && this.excludes.isEmpty()) {
-            return true;
-        } else if (this.includes.isEmpty()) {  // && ! this.excludes.isEmpty()
-            return this.excludes.stream().noneMatch(predicateForProjectId);
-        } else if (this.excludes.isEmpty()) {  // && !this.includes.isEmpty()
-            return true;
-        } else {
-            return true;
-        }
+        return this.includes.stream().anyMatch(predicateForProjectId) && this.excludes.stream().noneMatch(predicateForProjectId);
     }
-
-//    /**
-//     * <p>performCheckins.</p>
-//     *
-//     * @param releaseDescriptor  a {@link org.apache.maven.shared.release.config.ReleaseDescriptor} object
-//     * @param releaseEnvironment a {@link org.apache.maven.shared.release.env.ReleaseEnvironment} object
-//     * @param reactorProjects    a {@link java.util.List} object
-//     * @param message            a {@link java.lang.String} object
-//     * @throws org.apache.maven.shared.release.scm.ReleaseScmRepositoryException if any.
-//     * @throws org.apache.maven.shared.release.ReleaseExecutionException         if any.
-//     * @throws org.apache.maven.shared.release.scm.ReleaseScmCommandException    if any.
-//     */
-//    protected void performCheckins(
-//            ReleaseDescriptor releaseDescriptor,
-//            ReleaseEnvironment releaseEnvironment,
-//            List<MavenProject> reactorProjects,
-//            String message)
-//            throws ReleaseScmRepositoryException, ReleaseExecutionException, ReleaseScmCommandException {
-//
-//        getLogger().info("Checking in modified POMs...");
-//
-//        ScmRepository repository;
-//        ScmProvider provider;
-//        try {
-//            repository = scmRepositoryConfigurator.getConfiguredRepository(
-//                    releaseDescriptor, releaseEnvironment.getSettings());
-//
-//            repository.getProviderRepository().setPushChanges(releaseDescriptor.isPushChanges());
-//
-//            repository.getProviderRepository().setWorkItem(releaseDescriptor.getWorkItem());
-//
-//            provider = scmRepositoryConfigurator.getRepositoryProvider(repository);
-//        } catch (ScmRepositoryException e) {
-//            throw new ReleaseScmRepositoryException(e.getMessage(), e.getValidationMessages());
-//        } catch (NoSuchScmProviderException e) {
-//            throw new ReleaseExecutionException("Unable to configure SCM repository: " + e.getMessage(), e);
-//        }
-//
-//        if (releaseDescriptor.isCommitByProject()) {
-//            for (MavenProject project : reactorProjects) {
-//                List<File> pomFiles = createPomFiles(releaseDescriptor, project);
-//                ScmFileSet fileSet = new ScmFileSet(project.getFile().getParentFile(), pomFiles);
-//
-//                checkIn(provider, repository, fileSet, releaseDescriptor, message);
-//            }
-//        } else {
-//            List<File> pomFiles = createPomFiles(releaseDescriptor, reactorProjects);
-//            ScmFileSet fileSet = new ScmFileSet(new File(releaseDescriptor.getWorkingDirectory()), pomFiles);
-//
-//            checkIn(provider, repository, fileSet, releaseDescriptor, message);
-//        }
-//    }
-//
-//    /**
-//     * <p>Copied and modified from org.apache.maven.shared.release.phase.AbstractScmCommitPhase.</p>
-//     */
-//    private void checkIn(
-//            ScmProvider provider,
-//            ScmRepository repository,
-//            ScmFileSet fileSet,
-//            ReleaseDescriptor releaseDescriptor,
-//            String message)
-//            throws ReleaseExecutionException, ReleaseScmCommandException {
-//        CheckInScmResult result;
-//        try {
-//            result = provider.checkIn(repository, fileSet, (ScmVersion) null, message);
-//        } catch (ScmException e) {
-//            throw new ReleaseExecutionException("An error is occurred in the check-in process: " + e.getMessage(), e);
-//        }
-//
-//        if (!result.isSuccess()) {
-//            throw new ReleaseScmCommandException("Unable to commit files", result);
-//        }
-//        if (releaseDescriptor.isRemoteTagging()) {
-//            releaseDescriptor.setScmReleasedPomRevision(result.getScmRevision());
-//        }
-//    }
 
     /**
      * The main entry point for mojo.
@@ -402,7 +305,7 @@ public class CreateBomMojo extends BaseMojo {
             return;
         }
 
-        validateParameters();
+        validateAndPrepareParameters();
 
         createBom(mavenSession);
     }

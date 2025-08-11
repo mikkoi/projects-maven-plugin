@@ -12,9 +12,7 @@ import com.soebes.itf.jupiter.maven.MavenExecutionResult;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.DefaultModelReader;
-import org.apache.maven.model.io.DefaultModelWriter;
 import org.apache.maven.model.io.ModelReader;
-import org.apache.maven.model.io.ModelWriter;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Order;
@@ -46,13 +44,6 @@ public class CreateBomMojoIT {
         void the_first_test_case(MavenExecutionResult result) {
             // Log
             assertThat(result).isSuccessful();
-//                    .out().info()
-//                    .contains("com.github.mikkoi:projects-maven-plugin-create-bom-set-001")
-//                    .contains("com.github.mikkoi:other")
-//                    .contains("com.github.mikkoi:second")
-//                    .contains("com.github.mikkoi:fourth")
-//                    .contains("com.github.mikkoi:third");
-//            assertThat(bomExists("target/bom/pom.xml"));
             Path bomPath = Paths.get(result.getMavenProjectResult().getTargetProjectDirectory().toString(), "target", "bom", "pom.xml");
             assertThat(Files.exists(bomPath)).isTrue();
             final ModelReader modelReader = new DefaultModelReader();
@@ -118,14 +109,44 @@ public class CreateBomMojoIT {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+            assertThat(model.getDependencyManagement().getDependencies().size()).isEqualTo(2);
+            assertThat(model.getGroupId()).isEqualTo("this.test.project");
+            assertThat(model.getArtifactId()).isEqualTo("bom");
+            assertThat(model.getVersion()).isEqualTo("TODAY");
+            assertThat(model.getDependencyManagement().getDependencies().get(1).getGroupId()).isEqualTo("com.github.mikkoi");
+            assertThat(model.getDependencyManagement().getDependencies().get(1).getArtifactId()).isEqualTo("other-second");
+            assertThat(model.getDependencyManagement().getDependencies().get(1).getVersion()).isEqualTo("0.0.1-SNAPSHOT");
+            assertThat(model.getDependencyManagement().getDependencies().get(1).getType()).isEqualTo("pom");
+        }
+
+        @MavenTest
+        @SystemProperty(value = "projects.createBom.path", content = "target/bom-set-003/pom.xml")
+        @SystemProperty(value = "projects.createBom.groupId", content = "this.test.project")
+        @SystemProperty(value = "projects.createBom.artifactId", content = "bom")
+        @SystemProperty(value = "projects.createBom.version", content = "TODAY")
+        @SystemProperty(value = "projects.createBom.includes", content = "com.github.mikkoi:other*")
+        @SystemProperty(value = "projects.createBom.excludes", content = "other,other-second")
+        @SystemProperty(value = "projects.createBom.sortOrder", content = "alphabetical")
+        @Order(4)
+        void the_fourth_test_case(MavenExecutionResult result) {
+            assertThat(result).isSuccessful();
+            Path bomPath = Paths.get(result.getMavenProjectResult().getTargetProjectDirectory().toString(), "target", "bom-set-003", "pom.xml");
+            assertThat(Files.exists(bomPath)).isTrue();
+            final ModelReader modelReader = new DefaultModelReader();
+            Model model;
+            try {
+                model = modelReader.read(bomPath.toFile(), null);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             assertThat(model.getDependencyManagement().getDependencies().size()).isEqualTo(3);
             assertThat(model.getGroupId()).isEqualTo("this.test.project");
             assertThat(model.getArtifactId()).isEqualTo("bom");
             assertThat(model.getVersion()).isEqualTo("TODAY");
-            assertThat(model.getDependencyManagement().getDependencies().get(3).getGroupId().equals("com.github.mikkoi")).isTrue();
-            assertThat(model.getDependencyManagement().getDependencies().get(3).getArtifactId().equals("other-second-third")).isTrue();
-            assertThat(model.getDependencyManagement().getDependencies().get(3).getVersion().equals("0.0.1-SNAPSHOT")).isTrue();
-            assertThat(model.getDependencyManagement().getDependencies().get(3).getType().equals("jar")).isTrue();
+            assertThat(model.getDependencyManagement().getDependencies().get(2).getGroupId()).isEqualTo("com.github.mikkoi");
+            assertThat(model.getDependencyManagement().getDependencies().get(2).getArtifactId()).isEqualTo("other-second-third");
+            assertThat(model.getDependencyManagement().getDependencies().get(2).getVersion()).isEqualTo("0.0.1-SNAPSHOT");
+            assertThat(model.getDependencyManagement().getDependencies().get(2).getType()).isEqualTo("pom");
         }
 
     }

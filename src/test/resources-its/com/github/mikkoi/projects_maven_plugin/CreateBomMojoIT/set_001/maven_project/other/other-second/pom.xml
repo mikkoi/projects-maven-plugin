@@ -17,9 +17,9 @@
     </description>
 
     <modules>
-        <module>third</module>
-        <module>fourth</module>
-        <module>fifth</module>
+        <module>other-second-third</module>
+        <module>other-second-fourth</module>
+        <module>other-second-fifth</module>
     </modules>
 
 </project>
