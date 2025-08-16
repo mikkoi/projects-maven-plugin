@@ -15,25 +15,25 @@ public abstract class BaseMojo extends AbstractMojo {
     /**
      * Skip execution
      */
-    @Parameter(property = "projects" + ".skip", defaultValue = "false", alias = "skip")
+    @Parameter(property = "projects" + ".skip", alias = "skip", defaultValue = "false")
     boolean skip;
 
     /**
      * Force output to STDOUT instead of using [INFO] logging level.
      */
-    @Parameter(property = "projects" + ".forceStdout", defaultValue = "false", alias = "forceStdoutTwo")
+    @Parameter(property = "projects" + ".forceStdout", alias = "forceStdoutTwo", defaultValue = "false")
     boolean forceStdout;
 
     /**
      * Run only in the project which is at execution root, i.e. the dir in which `mvn` is executed.
      */
-    @Parameter(property = "projects" + ".runOnlyAtExecutionRoot", defaultValue = "true")
+    @Parameter(property = "projects" + ".runOnlyAtExecutionRoot", alias = "runOnlyAtExecutionRoot", defaultValue = "true")
     boolean runOnlyAtExecutionRoot;
 
     /**
      * Give warning instead of error.
      */
-    @Parameter(property = "projects" + ".errorIsWarning", defaultValue = "false")
+    @Parameter(property = "projects" + ".errorIsWarning", alias = "errorIsWarning", defaultValue = "false")
     boolean errorIsWarning;
 
     /**

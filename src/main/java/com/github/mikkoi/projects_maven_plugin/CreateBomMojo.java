@@ -42,22 +42,28 @@ public class CreateBomMojo extends BaseMojo {
     String bomFilepath;
 
     /**
-     * BOM path. Filepath to write the new pom.xml.
+     * BOM file groupId.
      */
     @Parameter(property = "projects" + ".createBom" + ".bomGroupId", alias = "bomGroupId")
     String bomGroupId;
 
     /**
-     * BOM path. Filepath to write the new pom.xml.
+     * BOM file artifactId.
      */
     @Parameter(property = "projects" + ".createBom" + ".bomArtifactId", alias = "bomArtifactId")
     String bomArtifactId;
 
     /**
-     * BOM path. Filepath to write the new pom.xml.
+     * BOM file version.
      */
     @Parameter(property = "projects" + ".createBom" + ".bomVersion", alias = "bomVersion")
     String bomVersion;
+
+    /**
+     * BOM name.
+     */
+    @Parameter(property = "projects" + ".createBom" + ".bomName", alias = "bomName")
+    String bomName;
 
     /**
      * Include the projects of the current build.
@@ -122,6 +128,10 @@ public class CreateBomMojo extends BaseMojo {
         getLog().debug("excludes=" + excludes.toString());
         getLog().debug("sortOrder=" + sortOrder);
         getLog().debug("bomPath=" + bomFilepath);
+        getLog().debug("bomGroupId=" + bomGroupId);
+        getLog().debug("bomArtifactId=" + bomArtifactId);
+        getLog().debug("bomVersion=" + bomVersion);
+        getLog().debug("bomName=" + bomName);
 
         for ( String a : includes ) {
             if (a == null) {
@@ -163,7 +173,7 @@ public class CreateBomMojo extends BaseMojo {
     }
 
     /**
-     * Create a comparator which compares Maven project groupId and artifactId
+     * Create a comparator which compares Maven project groupId, artifactId and type
      * for alphabetical listing.
      *
      * @param sortOrder "random" / "alphabetic"
@@ -179,11 +189,17 @@ public class CreateBomMojo extends BaseMojo {
                 String o2groupId = o2.getGroupId();
                 String o1artifactId = o1.getArtifactId();
                 String o2artifactId = o2.getArtifactId();
+                String o1type = o1.getPackaging();
+                String o2type = o2.getPackaging();
                 int r = o1GroupId.compareTo(o2groupId);
                 if (r != 0) {
                     return r;
                 }
-                return o1artifactId.compareTo(o2artifactId);
+                int s = o1artifactId.compareTo(o2artifactId);
+                if (s != 0) {
+                    return s;
+                }
+                return o1type.compareTo(o2type);
             };
         }
         return comparator;
@@ -199,7 +215,7 @@ public class CreateBomMojo extends BaseMojo {
         String t = s.replace(".", "\\.");
         t = t.replace("*", ".*");
         if (!t.contains(":")) {
-            t = ".*:" + t;
+            t = ".*:" + t + ":.*";
         }
         return t;
     }
@@ -253,6 +269,9 @@ public class CreateBomMojo extends BaseMojo {
         if (this.bomVersion != null && !this.bomVersion.isEmpty()) {
             model.setVersion(this.bomVersion);
         }
+        if (this.bomName != null && !this.bomName.isEmpty()) {
+            model.setName(this.bomName);
+        }
 
         // Clear dependencyManagement and fill it with all projects in the build.
         getLog().debug(String.format("model.getDependencyManagement=%s", model.getDependencyManagement()));
@@ -279,13 +298,26 @@ public class CreateBomMojo extends BaseMojo {
             getLog().error(String.format("Cannot write POM %s", this.bomFilepath), e);
         }
 
+        if(attachToCurrentProject) {
+            final Model currentModel = currentProject.getOriginalModel();
+            final List<String> modules = currentModel.getModules();
+            modules.add(this.bomFilepath);
+            java.io.File modelFile = currentModel.getPomFile();
+            java.nio.file.Path p = Paths.get(modelFile.getAbsolutePath());
+            try {
+                writePOM(p, currentModel);
+            } catch (IOException e) {
+                getLog().error(String.format("Cannot write POM %s", p), e);
+            }
+        }
         getLog().debug(":End of createBom");
     }
 
     public boolean isIncluded(MavenProject mavenProject) {
         String projectGroupId = mavenProject.getGroupId();
         String projectArtifactId = mavenProject.getArtifactId();
-        String projectId = projectGroupId + ":" + projectArtifactId;
+        String projectType = mavenProject.getPackaging();
+        String projectId = projectGroupId + ":" + projectArtifactId + ":" + projectType;
 
         // Match from the end of the id, artifactId alone is enough.
         Predicate<String> predicateForProjectId = s -> projectId.matches(convertStringForMatching(s));
