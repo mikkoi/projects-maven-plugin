@@ -79,6 +79,12 @@ public class CreateBomMojo extends BaseMojo {
     @Parameter(property = "projects" + ".createBom" + ".errorDependencyConvergence", alias = "errorDependencyConvergence", defaultValue = "true")
     boolean errorDependencyConvergence;
 
+    /**
+     * Make the bom part of the current project by adding it as a module.
+     */
+    @Parameter(property = "projects" + ".createBom" + ".attachToCurrentProject", alias = "attachToCurrentProject", defaultValue = "false")
+    boolean attachToCurrentProject;
+
     private List<String> includes;
     /**
      * Include by project [groupId:]artifactId.
@@ -86,7 +92,7 @@ public class CreateBomMojo extends BaseMojo {
      * If includes list contains any items, they are evaluated first.
      * Then excludes are excluded from them.
      */
-    @Parameter(property = "projects" + ".createBom" + ".includes")
+    @Parameter(property = "projects" + ".createBom" + ".includes", alias = "includes")
     public void setIncludes(List<String> includes) {
         this.includes = includes;
     }
@@ -96,7 +102,7 @@ public class CreateBomMojo extends BaseMojo {
      * Exclude by project [groupId:]artifactId.
      * Default value: No projects excluded.
      */
-    @Parameter(property = "projects" + ".createBom" + ".excludes")
+    @Parameter(property = "projects" + ".createBom" + ".excludes", alias = "excludes")
     public void setExcludes(List<String> excludes) {
         this.excludes = excludes;
     }
