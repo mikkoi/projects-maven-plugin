@@ -79,8 +79,8 @@ public class TreeMojo extends BaseMojo {
      * either on the command line or using configuration element in pom.
      */
     private void validateParameters() {
-        getLog().debug("includes=" + includes.toString());
-        getLog().debug("excludes=" + excludes.toString());
+        getLog().debug("includes=" + includes);
+        getLog().debug("excludes=" + excludes);
 
 //        excludes.stream().forEach( a -> {
 //            if(a == null) {
