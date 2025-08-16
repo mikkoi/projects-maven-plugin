@@ -38,25 +38,25 @@ public class CreateBomMojo extends BaseMojo {
     /**
      * BOM path. Filepath to write the new pom.xml.
      */
-    @Parameter(property = "projects" + ".createBom" + ".path", alias = "path", defaultValue = "DEFAULT_TO_BE_REPLACED")
-    String bomPath;
+    @Parameter(property = "projects" + ".createBom" + ".bomFilepath", alias = "bomFilepath", defaultValue = "DEFAULT_TO_BE_REPLACED")
+    String bomFilepath;
 
     /**
      * BOM path. Filepath to write the new pom.xml.
      */
-    @Parameter(property = "projects" + ".createBom" + ".groupId", alias = "groupId")
+    @Parameter(property = "projects" + ".createBom" + ".bomGroupId", alias = "bomGroupId")
     String bomGroupId;
 
     /**
      * BOM path. Filepath to write the new pom.xml.
      */
-    @Parameter(property = "projects" + ".createBom" + ".artifactId", alias = "artifactId")
+    @Parameter(property = "projects" + ".createBom" + ".bomArtifactId", alias = "bomArtifactId")
     String bomArtifactId;
 
     /**
      * BOM path. Filepath to write the new pom.xml.
      */
-    @Parameter(property = "projects" + ".createBom" + ".version", alias = "version")
+    @Parameter(property = "projects" + ".createBom" + ".bomVersion", alias = "bomVersion")
     String bomVersion;
 
     /**
@@ -115,7 +115,7 @@ public class CreateBomMojo extends BaseMojo {
         getLog().debug("includes=" + includes.toString());
         getLog().debug("excludes=" + excludes.toString());
         getLog().debug("sortOrder=" + sortOrder);
-        getLog().debug("bomPath=" + bomPath);
+        getLog().debug("bomPath=" + bomFilepath);
 
         for ( String a : includes ) {
             if (a == null) {
@@ -136,23 +136,24 @@ public class CreateBomMojo extends BaseMojo {
             throw new MojoExecutionException(sortOrder, "Failure in parameter", "Failure in parameter 'sortOrder'. Allowed values: 'maven', 'alphabetical'.");
         }
 
-        if(bomPath.equals("DEFAULT_TO_BE_REPLACED")) {
+        if(bomFilepath.equals("DEFAULT_TO_BE_REPLACED")) {
             // Replace with default: target/bom/pom.xml
-            bomPath = mavenSession.getCurrentProject().getBuild().getDirectory() + "/bom/pom.xml";
-        } else if (bomPath.isEmpty()) {
-            throw new MojoExecutionException(bomPath, "Failure in parameter", "Failure in parameter 'bomPath'. String is null");
+            bomFilepath = mavenSession.getCurrentProject().getBuild().getDirectory() + "/bom/pom.xml";
+        } else if (bomFilepath.isEmpty()) {
+            throw new MojoExecutionException(bomFilepath, "Failure in parameter", "Failure in parameter 'bomPath'. String is null");
         }
 
         // Validate bomPath
         try {
-            Files.createDirectories(Paths.get(bomPath).getParent());
+            Path pathParent = Paths.get(bomFilepath).getParent();
+            getLog().debug("pathParent=" + pathParent);
+            if(pathParent != null) {
+                Files.createDirectories(pathParent);
+            }
         } catch (IOException e) {
-            throw new MojoExecutionException(bomPath, "Failure in parameter", String.format("Failure in parameter 'bomPath'. Path '%s' not found", Paths.get(bomPath)));
+            throw new MojoExecutionException(bomFilepath, "Failure in parameter", String.format("Failure in parameter 'bomPath'. Cannot create path '%s'", Paths.get(bomFilepath)));
         }
-        if(Paths.get(bomPath).getFileName() == null) {
-            throw new MojoExecutionException(bomPath, "Failure in parameter", String.format("Failure in parameter 'bomPath'. Path '%s' has no file", Paths.get(bomPath)));
-        }
-        getLog().debug("bomPath(resolved)=" + bomPath);
+        getLog().debug("bomPath(resolved)=" + bomFilepath);
     }
 
     /**
@@ -265,12 +266,11 @@ public class CreateBomMojo extends BaseMojo {
         }
 
         // Save the BOM POM
-        final String bomPath = this.bomPath;
         try {
-            writePOM(Paths.get(this.bomPath).toAbsolutePath(), model);
-            getLog().info(String.format("BOM saved in %s", bomPath));
+            writePOM(Paths.get(this.bomFilepath).toAbsolutePath(), model);
+            getLog().info(String.format("BOM saved in %s", this.bomFilepath));
         } catch (IOException e) {
-            getLog().error(String.format("Cannot write POM %s", bomPath), e);
+            getLog().error(String.format("Cannot write POM %s", this.bomFilepath), e);
         }
 
         getLog().debug(":End of createBom");
