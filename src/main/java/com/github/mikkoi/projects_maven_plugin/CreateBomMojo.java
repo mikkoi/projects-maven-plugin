@@ -38,7 +38,7 @@ public class CreateBomMojo extends BaseMojo {
     /**
      * BOM path. Filepath to write the new pom.xml.
      */
-    @Parameter(property = "projects" + ".createBom" + ".path", defaultValue = "DEFAULT_TO_BE_REPLACED")
+    @Parameter(property = "projects" + ".createBom" + ".path", alias = "path", defaultValue = "DEFAULT_TO_BE_REPLACED")
     String bomPath;
 
     /**
@@ -91,7 +91,7 @@ public class CreateBomMojo extends BaseMojo {
         this.includes = includes;
     }
 
-    List<String> excludes;
+    private List<String> excludes;
     /**
      * Exclude by project [groupId:]artifactId.
      * Default value: No projects excluded.
