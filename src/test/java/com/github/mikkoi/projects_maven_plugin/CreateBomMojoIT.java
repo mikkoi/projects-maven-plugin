@@ -38,7 +38,9 @@ public class CreateBomMojoIT {
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class set_001 {
 
+        private final int NUMBER_OF_PROJECTS_IN_BUILD = 6; // Including root
         // Create bom with all the projects in the build (set-001)
+        // Default settings
         @MavenTest
         @Order(1)
         void the_first_test_case(MavenExecutionResult result) {
@@ -53,28 +55,39 @@ public class CreateBomMojoIT {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            assertThat(model.getDependencyManagement().getDependencies().size()).isEqualTo(6);
+            // Number of dependencies in DependencyManagement match number of projects in the build.
+            assertThat(model.getDependencyManagement().getDependencies().size()).isEqualTo(NUMBER_OF_PROJECTS_IN_BUILD);
+
+            // BOM project details match root project equivalents.
+            assertThat(model.getGroupId()).isEqualTo("com.github.mikkoi");
+            assertThat(model.getArtifactId()).isEqualTo("bom");
+            assertThat(model.getVersion()).isEqualTo(result.getMavenProjectResult().getModel().getVersion());
+            assertThat(model.getPackaging()).isEqualTo("pom");
+            assertThat(model.getName()).isEqualTo("Project BOM");
+
             final Dependency rootProject = new Dependency();
             rootProject.setType("pom");
             rootProject.setGroupId("com.github.mikkoi");
             rootProject.setArtifactId("projects-maven-plugin-create-bom-set-001");
             rootProject.setVersion("0.0.1-SNAPSHOT");
-            assertThat(model.getDependencyManagement().getDependencies().get(0).getGroupId().equals(rootProject.getGroupId())).isTrue();
+            assertThat(model.getDependencyManagement().getDependencies().get(0).getType().equals(rootProject.getType())).isTrue();assertThat(model.getDependencyManagement().getDependencies().get(0).getGroupId().equals(rootProject.getGroupId())).isTrue();
             assertThat(model.getDependencyManagement().getDependencies().get(0).getArtifactId().equals(rootProject.getArtifactId())).isTrue();
             assertThat(model.getDependencyManagement().getDependencies().get(0).getVersion().equals(rootProject.getVersion())).isTrue();
             assertThat(model.getDependencyManagement().getDependencies().get(0).getType().equals(rootProject.getType())).isTrue();
         }
 
+        // Custom bom file location, artifact, group and version id, and exclude root
         @MavenTest
-        @SystemProperty(value = "projects.createBom.path", content = "target/bom-set-002/pom.xml")
-        @SystemProperty(value = "projects.createBom.groupId", content = "this.test.project")
-        @SystemProperty(value = "projects.createBom.artifactId", content = "bom")
-        @SystemProperty(value = "projects.createBom.version", content = "123")
         @SystemProperty(value = "projects.createBom.excludes", content = "com.github.mikkoi:projects-maven-plugin-create-bom-set-001")
+        @SystemProperty(value = "projects.createBom.bomFilepath", content = "target/bom-case-002/pom.xml")
+        @SystemProperty(value = "projects.createBom.bomGroupId", content = "this.test.project")
+        @SystemProperty(value = "projects.createBom.bomArtifactId", content = "bom")
+        @SystemProperty(value = "projects.createBom.bomVersion", content = "123")
+        @SystemProperty(value = "projects.createBom.bomName", content = "BOM file for project")
         @Order(2)
         void the_second_test_case(MavenExecutionResult result) {
             assertThat(result).isSuccessful();
-            Path bomPath = Paths.get(result.getMavenProjectResult().getTargetProjectDirectory().toString(), "target", "bom-set-002", "pom.xml");
+            Path bomPath = Paths.get(result.getMavenProjectResult().getTargetProjectDirectory().toString(), "target", "bom-case-002", "pom.xml");
             assertThat(Files.exists(bomPath)).isTrue();
             final ModelReader modelReader = new DefaultModelReader();
             Model model;
@@ -83,24 +96,25 @@ public class CreateBomMojoIT {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            assertThat(model.getDependencyManagement().getDependencies().size()).isEqualTo(5);
+            assertThat(model.getDependencyManagement().getDependencies().size()).isEqualTo(NUMBER_OF_PROJECTS_IN_BUILD - 1);
             assertThat(model.getGroupId()).isEqualTo("this.test.project");
             assertThat(model.getArtifactId()).isEqualTo("bom");
             assertThat(model.getVersion()).isEqualTo("123");
+            assertThat(model.getName()).isEqualTo("BOM file for project");
         }
 
         @MavenTest
-        @SystemProperty(value = "projects.createBom.path", content = "target/bom-set-003/pom.xml")
-        @SystemProperty(value = "projects.createBom.groupId", content = "this.test.project")
-        @SystemProperty(value = "projects.createBom.artifactId", content = "bom")
-        @SystemProperty(value = "projects.createBom.version", content = "TODAY")
-        @SystemProperty(value = "projects.createBom.includes", content = "com.github.mikkoi:other*")
-        @SystemProperty(value = "projects.createBom.excludes", content = "com.github.mikkoi:other-second-*")
+        @SystemProperty(value = "projects.createBom.includes", content = "com.github.mikkoi:other*") // => 5
+        @SystemProperty(value = "projects.createBom.excludes", content = "com.github.mikkoi:other-second-*") // => 2
         @SystemProperty(value = "projects.createBom.sortOrder", content = "alphabetical")
+        @SystemProperty(value = "projects.createBom.bomFilepath", content = "target/bom-case-003/pom.xml")
+        @SystemProperty(value = "projects.createBom.bomGroupId", content = "this.test.project")
+        @SystemProperty(value = "projects.createBom.bomArtifactId", content = "bom")
+        @SystemProperty(value = "projects.createBom.bomVersion", content = "TODAY")
         @Order(3)
         void the_third_test_case(MavenExecutionResult result) {
             assertThat(result).isSuccessful();
-            Path bomPath = Paths.get(result.getMavenProjectResult().getTargetProjectDirectory().toString(), "target", "bom-set-003", "pom.xml");
+            Path bomPath = Paths.get(result.getMavenProjectResult().getTargetProjectDirectory().toString(), "target", "bom-case-003", "pom.xml");
             assertThat(Files.exists(bomPath)).isTrue();
             final ModelReader modelReader = new DefaultModelReader();
             Model model;
@@ -109,7 +123,7 @@ public class CreateBomMojoIT {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            assertThat(model.getDependencyManagement().getDependencies().size()).isEqualTo(2);
+            assertThat(model.getDependencyManagement().getDependencies().size()).isEqualTo(NUMBER_OF_PROJECTS_IN_BUILD - 4);
             assertThat(model.getGroupId()).isEqualTo("this.test.project");
             assertThat(model.getArtifactId()).isEqualTo("bom");
             assertThat(model.getVersion()).isEqualTo("TODAY");
@@ -120,17 +134,18 @@ public class CreateBomMojoIT {
         }
 
         @MavenTest
-        @SystemProperty(value = "projects.createBom.path", content = "target/bom-set-003/pom.xml")
-        @SystemProperty(value = "projects.createBom.groupId", content = "this.test.project")
-        @SystemProperty(value = "projects.createBom.artifactId", content = "bom")
-        @SystemProperty(value = "projects.createBom.version", content = "TODAY")
         @SystemProperty(value = "projects.createBom.includes", content = "com.github.mikkoi:other*")
         @SystemProperty(value = "projects.createBom.excludes", content = "other,other-second")
         @SystemProperty(value = "projects.createBom.sortOrder", content = "alphabetical")
+        @SystemProperty(value = "projects.createBom.bomFilepath", content = "target/bom-case-004/pom.xml")
+        @SystemProperty(value = "projects.createBom.bomGroupId", content = "this.test.project")
+        @SystemProperty(value = "projects.createBom.bomArtifactId", content = "bom")
+        @SystemProperty(value = "projects.createBom.bomVersion", content = "TODAY")
+        @SystemProperty(value = "projects.createBom.bomName", content = "BOM TODAY")
         @Order(4)
         void the_fourth_test_case(MavenExecutionResult result) {
             assertThat(result).isSuccessful();
-            Path bomPath = Paths.get(result.getMavenProjectResult().getTargetProjectDirectory().toString(), "target", "bom-set-003", "pom.xml");
+            Path bomPath = Paths.get(result.getMavenProjectResult().getTargetProjectDirectory().toString(), "target", "bom-case-004", "pom.xml");
             assertThat(Files.exists(bomPath)).isTrue();
             final ModelReader modelReader = new DefaultModelReader();
             Model model;
@@ -139,10 +154,11 @@ public class CreateBomMojoIT {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            assertThat(model.getDependencyManagement().getDependencies().size()).isEqualTo(3);
+            assertThat(model.getDependencyManagement().getDependencies().size()).isEqualTo(NUMBER_OF_PROJECTS_IN_BUILD - 3);
             assertThat(model.getGroupId()).isEqualTo("this.test.project");
             assertThat(model.getArtifactId()).isEqualTo("bom");
             assertThat(model.getVersion()).isEqualTo("TODAY");
+            assertThat(model.getName()).isEqualTo("BOM TODAY");
             assertThat(model.getDependencyManagement().getDependencies().get(2).getGroupId()).isEqualTo("com.github.mikkoi");
             assertThat(model.getDependencyManagement().getDependencies().get(2).getArtifactId()).isEqualTo("other-second-third");
             assertThat(model.getDependencyManagement().getDependencies().get(2).getVersion()).isEqualTo("0.0.1-SNAPSHOT");

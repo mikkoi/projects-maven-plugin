@@ -1,6 +1,7 @@
 package com.github.mikkoi.projects_maven_plugin;
 
 import org.apache.maven.model.Dependency;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
@@ -17,7 +18,10 @@ import java.util.function.Predicate;
  * as dependencies for
  * <a href="https://www.eclemma.org/jacoco/trunk/doc/report-aggregate-mojo.html">Jacoco report-aggregate goal</a>.
  */
-@Mojo(name = "add-internal")
+@Mojo(name = "add-internal",
+        aggregator = true,
+        defaultPhase = LifecyclePhase.VALIDATE
+        )
 public class AddInternalMojo extends BaseMojo {
 
     /**
@@ -62,29 +66,6 @@ public class AddInternalMojo extends BaseMojo {
     private String printFormat;
 
     /**
-     * The main entry point for mojo.
-     */
-    @Override
-    public void execute() {
-        if (this.skip || this.thisMojoSkip) {
-            return;
-        }
-        validateParameters();
-
-//        if (runOnlyAtExecutionRoot && !isLastProjectInReactor(this.mavenSession)) {
-//            return;
-//        }
-        // if includes/excludes project artifactId and groupId are full and not found
-        // getLog().warn("Parameter validation: Include project ** not found.")
-        // or MojoExecutionException
-
-        final List<MavenProject> projects = mavenSession.getProjects();
-        final List<String> outRows = addInternal(projects);
-
-        printOut(outRows);
-    }
-
-    /**
      * Validate parameters provided via properties
      * either on the command line or using configuration element in pom.
      */
@@ -101,11 +82,7 @@ public class AddInternalMojo extends BaseMojo {
      */
     public List<String> addInternal(List<MavenProject> projects) {
         getLog().debug("Begin of projects:add-internal");
-//        Comparator<MavenProject> comparator = getMavenProjectComparator(this.sortOrder);
         List<String> rows = new ArrayList<>();
-//        projects.stream().filter(this::isIncluded).sorted(comparator).forEach(mavenProject -> {
-//            rows.add(formatProject(mavenProject));
-//        });
         MavenProject currentProject = this.mavenSession.getCurrentProject();
         getLog().debug(String.format("Current Project: %s:%s", currentProject.getGroupId(), currentProject.getArtifactId()));
 
@@ -124,12 +101,6 @@ public class AddInternalMojo extends BaseMojo {
                 dependency.setScope("compile");
                 @SuppressWarnings("unchecked") List<Dependency> currentProjectDependencies = currentProject.getDependencies();
                 currentProjectDependencies.add(dependency);
-//                new MarkupBuilder(xmlWriter).dependency {
-//                    groupId(dependencyProject.getGroupId())
-//                    artifactId(dependencyProject.getArtifactId())
-//                    version(dependencyProject.getVersion())
-//                }
-//                xmlWriter.write("\n")
                 getLog().info(String.format("Add dependency %s:%s:%s to project %s",
                         project.getGroupId(),
                         project.getArtifactId(),
@@ -140,13 +111,6 @@ public class AddInternalMojo extends BaseMojo {
         });
         getLog().debug("End of iterate");
 
-//        Files.createDirectories(Paths.get(project.getBuild().getDirectory()))
-//        def String dependenciesFilePath = project.getBuild().getDirectory() + "/dependencies.xml"
-//        log.info("Dependencies list written in {}", dependenciesFilePath)
-//        def file = new File(dependenciesFilePath)
-//        file.createNewFile()
-//        file.text=xmlWriter
-//                                    ]]></source>
         getLog().debug(":End of projects:add-internal");
         return rows;
     }
@@ -261,6 +225,26 @@ public class AddInternalMojo extends BaseMojo {
         } else {
             return this.includes.stream().anyMatch(predicateForProjectId) && this.excludes.stream().noneMatch(predicateForProjectId);
         }
+    }
+
+    /**
+     * The main entry point for mojo.
+     */
+    @Override
+    public void execute() {
+        if (this.skip || this.thisMojoSkip) {
+            return;
+        }
+        validateParameters();
+
+        // if includes/excludes project artifactId and groupId are full and not found
+        // getLog().warn("Parameter validation: Include project ** not found.")
+        // or MojoExecutionException
+
+        final List<MavenProject> projects = mavenSession.getProjects();
+        final List<String> outRows = addInternal(projects);
+
+        printOut(outRows);
     }
 
 }

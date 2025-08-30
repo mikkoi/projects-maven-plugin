@@ -1,5 +1,7 @@
 package com.github.mikkoi.projects_maven_plugin;
 
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
@@ -7,29 +9,34 @@ import org.apache.maven.project.MavenProject;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.Predicate;
 
 /**
  * List all projects in the build.
  */
-@Mojo(name = "list")
+@Mojo(name = "list", defaultPhase = LifecyclePhase.NONE, aggregator = true)
 public class ListMojo extends BaseMojo {
 
-    /**
-     * Exclude by project [groupId:]artifactId.
-     * Default value: No projects excluded.
-     * If includes list contains any items, they are evaluated first.
-     * Then excludes are excluded from them.
-     */
-    @Parameter(property = "projects" + ".list" + ".excludes")
-    List<String> excludes;
-
+    private List<String> includes;
     /**
      * Include by project [groupId:]artifactId.
      * Default value: all projects included.
+     * If includes list contains any items, they are evaluated first.
+     * Then excludes are excluded from them.
      */
-    @Parameter(property = "projects" + ".list" + ".includes")
-    private List<String> includes;
+    @Parameter(property = "projects" + ".list" + ".includes", alias = "includes")
+    public void setIncludes(List<String> includes) {
+        this.includes = includes;
+    }
+
+    private List<String> excludes;
+    /**
+     * Exclude by project [groupId:]artifactId.
+     * Default value: No projects excluded.
+     */
+    @Parameter(property = "projects" + ".list" + ".excludes", alias = "excludes")
+    public void setExcludes(List<String> excludes) {
+        this.excludes = excludes;
+    }
 
     /**
      * Sorting order: maven | alphabetic, default: maven
@@ -37,47 +44,39 @@ public class ListMojo extends BaseMojo {
     @Parameter(property = "projects" + ".list" + ".sortOrder", defaultValue = "maven")
     String sortOrder;
 
+    private String printFormat;
     /**
      * Format for printing.
      */
-    @Parameter(property = "projects" + ".list" + ".printFormat", defaultValue = "{groupId}:{artifactId}")
-    private String printFormat;
-
-    /**
-     * The main entry point for mojo.
-     */
-    @Override
-    public void execute() {
-        if (this.skip) {
-            return;
-        }
-        MavenProject currentProject = this.mavenSession.getCurrentProject();
-        getLog().debug(String.format("Current Project: %s:%s", currentProject.getGroupId(), currentProject.getArtifactId()));
-        MavenProject topLevelProject = this.mavenSession.getTopLevelProject();
-        getLog().debug(String.format("Top Level Project: %s:%s", topLevelProject.getGroupId(), topLevelProject.getArtifactId()));
-
-        validateParameters();
-
-        if (runOnlyAtExecutionRoot && !isLastProjectInReactor(this.mavenSession)) {
-            return;
-        }
-
-        final List<MavenProject> projects = mavenSession.getProjects();
-
-        printOut(this.list(projects));
+    @Parameter(property = "projects" + ".list" + ".printFormat", defaultValue = "{groupId}:{artifactId}:{packaging}")
+    public void setPrintFormat(String printFormat) {
+        this.printFormat = printFormat;
     }
 
     /**
      * Validate parameters provided via properties
      * either on the command line or using configuration element in pom.
      */
-    private void validateParameters() {
+    private void validateAndPrepareParameters() throws MojoExecutionException {
         getLog().debug("includes=" + includes);
         getLog().debug("excludes=" + excludes);
+        getLog().debug("sortOrder=" + sortOrder);
 
-//        excludes.stream().forEach( a -> {
-//            if(a == null) {
-//                throw MojoExecutionException(a, "Failure in parameter", "Failure in parameter excludes. String is null");
+        for ( String a : includes ) {
+            if (a == null) {
+                throw new MojoExecutionException(includes, "Failure in parameter", "Failure in parameter 'includes'. String is null");
+            }
+        }
+        if (includes.isEmpty()) {
+            includes.add("*");
+        }
+
+        for ( String a : excludes ) {
+            if (a == null) {
+                throw new MojoExecutionException(excludes, "Failure in parameter", "Failure in parameter 'excludes'. String is null");
+            }
+        }
+
     }
 
     /**
@@ -88,60 +87,11 @@ public class ListMojo extends BaseMojo {
      */
     public List<String> list(List<MavenProject> projects) {
         getLog().debug("Begin of projects:");
-        Comparator<MavenProject> comparator = getMavenProjectComparator(this.sortOrder);
+        Comparator<MavenProject> comparator = MojoUtilities.getMavenProjectComparator(this.sortOrder);
         List<String> rows = new ArrayList<>();
-        projects.stream().filter(this::isIncluded).sorted(comparator).forEach(mavenProject -> {
-            rows.add(formatProject(mavenProject));
-        });
+        projects.stream().filter(this::isIncluded).sorted(comparator).forEach(mavenProject -> rows.add(formatProject(mavenProject)));
         getLog().debug(":End of projects");
         return rows;
-    }
-
-    /**
-     * Create a comparator which compares Maven project groupId and artifactId
-     * for alphabetical listing.
-     *
-     * @param sortOrder "random" / "alphabetic"
-     * @return the comparator
-     */
-    static Comparator<MavenProject> getMavenProjectComparator(String sortOrder) {
-        Comparator<MavenProject> comparator;
-        if ("maven".equals(sortOrder)) {
-            comparator = new Comparator<MavenProject>() {
-                @Override
-                public int compare(MavenProject o1, MavenProject o2) {
-                    return 0;
-                }
-            };
-        } else {
-            comparator = (o1, o2) -> {
-                String o1GroupId = o1.getGroupId();
-                String o2groupId = o2.getGroupId();
-                String o1artifactId = o1.getArtifactId();
-                String o2artifactId = o2.getArtifactId();
-                int r = o1GroupId.compareTo(o2groupId);
-                if (r != 0) {
-                    return r;
-                }
-                return o1artifactId.compareTo(o2artifactId);
-            };
-        }
-        return comparator;
-    }
-
-    /**
-     * Convert string for matching.
-     *
-     * @param s String
-     * @return converted string
-     */
-    static String convertStringForMatching(String s) {
-        String t = s.replace(".", "\\.");
-        t = t.replace("*", ".*");
-        if (!t.contains(":")) {
-            t = ".*:" + t;
-        }
-        return t;
     }
 
     /**
@@ -191,21 +141,31 @@ public class ListMojo extends BaseMojo {
     }
 
     public boolean isIncluded(MavenProject mavenProject) {
-        String projectGroupId = mavenProject.getGroupId();
-        String projectArtifactId = mavenProject.getArtifactId();
-        String projectId = projectGroupId + ":" + projectArtifactId;
+        boolean r = MojoUtilities.isIncluded(this.includes, this.excludes, mavenProject);
+        getLog().debug(String.format("isIncluded(%s:%s:%s:%s): %b", mavenProject.getGroupId(), mavenProject.getArtifactId(), mavenProject.getVersion(), mavenProject.getPackaging(), r));
+        return r;
+    }
 
-        // Match from the end of the id, artifactId alone is enough.
-        Predicate<String> predicateForProjectId = s -> projectId.matches(convertStringForMatching(s));
-        if (this.includes.isEmpty() && this.excludes.isEmpty()) {
-            return true;
-        } else if (this.includes.isEmpty()) {  // && ! this.excludes.isEmpty()
-            return this.excludes.stream().noneMatch(predicateForProjectId);
-        } else if (this.excludes.isEmpty()) {  // && !this.includes.isEmpty()
-            return true;
-        } else {
-            return true;
+    /**
+     * The main entry point for mojo.
+     */
+    @Override
+    public void execute() throws MojoExecutionException {
+        MavenProject currentProject = this.mavenSession.getCurrentProject();
+        getLog().debug(String.format("Current Project: %s:%s", currentProject.getGroupId(), currentProject.getArtifactId()));
+        MavenProject topLevelProject = this.mavenSession.getTopLevelProject();
+        getLog().debug(String.format("Top Level Project: %s:%s", topLevelProject.getGroupId(), topLevelProject.getArtifactId()));
+
+        if (this.skip) {
+            getLog().info("Skip execution ...");
+            return;
         }
+
+        validateAndPrepareParameters();
+
+        final List<MavenProject> projects = mavenSession.getProjects();
+
+        printOut(this.list(projects));
     }
 
 }

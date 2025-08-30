@@ -51,30 +51,6 @@ public class TreeMojo extends BaseMojo {
     String indent;
 
     /**
-     * The main entry point for mojo.
-     */
-    @Override
-    public void execute() {
-        if (this.skip) {
-            return;
-        }
-        MavenProject currentProject = this.mavenSession.getCurrentProject();
-        getLog().debug(String.format("Current Project: %s:%s", currentProject.getGroupId(), currentProject.getArtifactId()));
-        MavenProject topLevelProject = this.mavenSession.getTopLevelProject();
-        getLog().debug(String.format("Top Level Project: %s:%s", topLevelProject.getGroupId(), topLevelProject.getArtifactId()));
-
-        validateParameters();
-
-        if (runOnlyAtExecutionRoot && !isLastProjectInReactor(this.mavenSession)) {
-            return;
-        }
-
-        final List<MavenProject> projects = mavenSession.getProjects();
-
-        printOut(this.list(projects));
-    }
-
-    /**
      * Validate parameters provided via properties
      * either on the command line or using configuration element in pom.
      */
@@ -213,6 +189,26 @@ public class TreeMojo extends BaseMojo {
         } else {
             return true;
         }
+    }
+
+    /**
+     * The main entry point for mojo.
+     */
+    @Override
+    public void execute() {
+        if (this.skip) {
+            return;
+        }
+        MavenProject currentProject = this.mavenSession.getCurrentProject();
+        getLog().debug(String.format("Current Project: %s:%s", currentProject.getGroupId(), currentProject.getArtifactId()));
+        MavenProject topLevelProject = this.mavenSession.getTopLevelProject();
+        getLog().debug(String.format("Top Level Project: %s:%s", topLevelProject.getGroupId(), topLevelProject.getArtifactId()));
+
+        validateParameters();
+
+        final List<MavenProject> projects = mavenSession.getProjects();
+
+        printOut(this.list(projects));
     }
 
 }

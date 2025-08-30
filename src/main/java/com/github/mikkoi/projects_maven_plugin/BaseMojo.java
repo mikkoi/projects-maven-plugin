@@ -21,14 +21,8 @@ public abstract class BaseMojo extends AbstractMojo {
     /**
      * Force output to STDOUT instead of using [INFO] logging level.
      */
-    @Parameter(property = "projects" + ".forceStdout", alias = "forceStdoutTwo", defaultValue = "false")
+    @Parameter(property = "projects" + ".forceStdout", alias = "forceStdout", defaultValue = "false")
     boolean forceStdout;
-
-    /**
-     * Run only in the project which is at execution root, i.e. the dir in which `mvn` is executed.
-     */
-    @Parameter(property = "projects" + ".runOnlyAtExecutionRoot", alias = "runOnlyAtExecutionRoot", defaultValue = "true")
-    boolean runOnlyAtExecutionRoot;
 
     /**
      * Give warning instead of error.

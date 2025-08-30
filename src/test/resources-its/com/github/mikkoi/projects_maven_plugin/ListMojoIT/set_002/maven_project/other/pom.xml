@@ -5,7 +5,7 @@
 
     <parent>
         <groupId>com.github.mikkoi</groupId>
-        <artifactId>projects-maven-plugin-list-set-004</artifactId>
+        <artifactId>projects-maven-plugin-list-set-002</artifactId>
         <version>@project.version@</version>
     </parent>
 

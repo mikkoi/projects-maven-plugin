@@ -7,6 +7,7 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.io.DefaultModelWriter;
 import org.apache.maven.model.io.ModelWriter;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
@@ -26,7 +27,7 @@ import java.util.function.Predicate;
  * Empty dependencyManagement section.
  * Put all projects of the current build to its dependencyManagement section.
  */
-@Mojo(name = "create-bom")
+@Mojo(name = "create-bom", defaultPhase = LifecyclePhase.NONE, aggregator = true)
 public class CreateBomMojo extends BaseMojo {
 
     /**
@@ -44,25 +45,25 @@ public class CreateBomMojo extends BaseMojo {
     /**
      * BOM file groupId.
      */
-    @Parameter(property = "projects" + ".createBom" + ".bomGroupId", alias = "bomGroupId")
+    @Parameter(property = "projects" + ".createBom" + ".bomGroupId", alias = "bomGroupId", defaultValue = "DEFAULT_TO_BE_REPLACED")
     String bomGroupId;
 
     /**
      * BOM file artifactId.
      */
-    @Parameter(property = "projects" + ".createBom" + ".bomArtifactId", alias = "bomArtifactId")
+    @Parameter(property = "projects" + ".createBom" + ".bomArtifactId", alias = "bomArtifactId", defaultValue = "bom")
     String bomArtifactId;
 
     /**
      * BOM file version.
      */
-    @Parameter(property = "projects" + ".createBom" + ".bomVersion", alias = "bomVersion")
+    @Parameter(property = "projects" + ".createBom" + ".bomVersion", alias = "bomVersion", defaultValue = "DEFAULT_TO_BE_REPLACED")
     String bomVersion;
 
     /**
      * BOM name.
      */
-    @Parameter(property = "projects" + ".createBom" + ".bomName", alias = "bomName")
+    @Parameter(property = "projects" + ".createBom" + ".bomName", alias = "bomName", defaultValue = "Project BOM")
     String bomName;
 
     /**
@@ -124,10 +125,10 @@ public class CreateBomMojo extends BaseMojo {
      * either on the command line or using configuration element in pom.
      */
     private void validateAndPrepareParameters() throws MojoExecutionException {
-        getLog().debug("includes=" + includes.toString());
-        getLog().debug("excludes=" + excludes.toString());
+        getLog().debug("includes=" + includes);
+        getLog().debug("excludes=" + excludes);
         getLog().debug("sortOrder=" + sortOrder);
-        getLog().debug("bomPath=" + bomFilepath);
+        getLog().debug("bomFilepath=" + bomFilepath);
         getLog().debug("bomGroupId=" + bomGroupId);
         getLog().debug("bomArtifactId=" + bomArtifactId);
         getLog().debug("bomVersion=" + bomVersion);
@@ -148,11 +149,11 @@ public class CreateBomMojo extends BaseMojo {
             }
         }
 
-        if(! (sortOrder.equals("maven") || sortOrder.equals("alphabetical"))) {
+        if(! ("maven".equals(sortOrder) || "alphabetical".equals(sortOrder))) {
             throw new MojoExecutionException(sortOrder, "Failure in parameter", "Failure in parameter 'sortOrder'. Allowed values: 'maven', 'alphabetical'.");
         }
 
-        if(bomFilepath.equals("DEFAULT_TO_BE_REPLACED")) {
+        if("DEFAULT_TO_BE_REPLACED".equals(bomFilepath)) {
             // Replace with default: target/bom/pom.xml
             bomFilepath = mavenSession.getCurrentProject().getBuild().getDirectory() + "/bom/pom.xml";
         } else if (bomFilepath.isEmpty()) {
@@ -167,9 +168,29 @@ public class CreateBomMojo extends BaseMojo {
                 Files.createDirectories(pathParent);
             }
         } catch (IOException e) {
-            throw new MojoExecutionException(bomFilepath, "Failure in parameter", String.format("Failure in parameter 'bomPath'. Cannot create path '%s'", Paths.get(bomFilepath)));
+            throw new MojoExecutionException(
+                    bomFilepath,
+                    "Failure in parameter",
+                    String.format("Failure in parameter 'bomPath'. Cannot create path '%s'", Paths.get(bomFilepath))
+            );
         }
-        getLog().debug("bomPath(resolved)=" + bomFilepath);
+
+        if("DEFAULT_TO_BE_REPLACED".equals(bomGroupId)) {
+            bomGroupId = mavenSession.getCurrentProject().getGroupId();
+        }
+
+        if("DEFAULT_TO_BE_REPLACED".equals(bomVersion)) {
+            bomVersion = mavenSession.getCurrentProject().getVersion();
+        }
+
+        getLog().debug("includes(resolved)=" + includes);
+        getLog().debug("excludes(resolved)=" + excludes);
+        getLog().debug("sortOrder(resolved)=" + sortOrder);
+        getLog().debug("bomFilepath(resolved)=" + bomFilepath);
+        getLog().debug("bomGroupId(resolved)=" + bomGroupId);
+        getLog().debug("bomArtifactId(resolved)=" + bomArtifactId);
+        getLog().debug("bomVersion(resolved)=" + bomVersion);
+        getLog().debug("bomName(resolved)=" + bomName);
     }
 
     /**
@@ -203,21 +224,6 @@ public class CreateBomMojo extends BaseMojo {
             };
         }
         return comparator;
-    }
-
-    /**
-     * Convert string for matching.
-     *
-     * @param s String
-     * @return converted string
-     */
-    static String convertStringForMatching(String s) {
-        String t = s.replace(".", "\\.");
-        t = t.replace("*", ".*");
-        if (!t.contains(":")) {
-            t = ".*:" + t + ":.*";
-        }
-        return t;
     }
 
     /**
@@ -259,19 +265,10 @@ public class CreateBomMojo extends BaseMojo {
         model.setParent(null);
         model.setModules(null);
 
-        // Add new details where available
-        if (this.bomGroupId != null && !this.bomGroupId.isEmpty()) {
-            model.setGroupId(this.bomGroupId);
-        }
-        if (this.bomArtifactId != null && !this.bomArtifactId.isEmpty()) {
-            model.setArtifactId(this.bomArtifactId);
-        }
-        if (this.bomVersion != null && !this.bomVersion.isEmpty()) {
-            model.setVersion(this.bomVersion);
-        }
-        if (this.bomName != null && !this.bomName.isEmpty()) {
-            model.setName(this.bomName);
-        }
+        model.setGroupId(this.bomGroupId);
+        model.setArtifactId(this.bomArtifactId);
+        model.setVersion(this.bomVersion);
+        model.setName(this.bomName);
 
         // Clear dependencyManagement and fill it with all projects in the build.
         getLog().debug(String.format("model.getDependencyManagement=%s", model.getDependencyManagement()));
@@ -314,14 +311,9 @@ public class CreateBomMojo extends BaseMojo {
     }
 
     public boolean isIncluded(MavenProject mavenProject) {
-        String projectGroupId = mavenProject.getGroupId();
-        String projectArtifactId = mavenProject.getArtifactId();
-        String projectType = mavenProject.getPackaging();
-        String projectId = projectGroupId + ":" + projectArtifactId + ":" + projectType;
-
-        // Match from the end of the id, artifactId alone is enough.
-        Predicate<String> predicateForProjectId = s -> projectId.matches(convertStringForMatching(s));
-        return this.includes.stream().anyMatch(predicateForProjectId) && this.excludes.stream().noneMatch(predicateForProjectId);
+        boolean r = MojoUtilities.isIncluded(this.includes, this.excludes, mavenProject);
+        getLog().debug(String.format("isIncluded(%s:%s:%s:%s): %b", mavenProject.getGroupId(), mavenProject.getArtifactId(), mavenProject.getVersion(), mavenProject.getPackaging(), r));
+        return r;
     }
 
     /**
@@ -337,11 +329,6 @@ public class CreateBomMojo extends BaseMojo {
         getLog().debug(String.format("Current Project: %s:%s", currentProject.getGroupId(), currentProject.getArtifactId()));
         MavenProject topLevelProject = this.mavenSession.getTopLevelProject();
         getLog().debug(String.format("Top Level Project: %s:%s", topLevelProject.getGroupId(), topLevelProject.getArtifactId()));
-
-        if (runOnlyAtExecutionRoot && !this.mavenSession.getCurrentProject().isExecutionRoot()) {
-            getLog().debug("runOnlyAtExecutionRoot && !this.mavenSession.getCurrentProject().isExecutionRoot()");
-            return;
-        }
 
         validateAndPrepareParameters();
 
