@@ -4,7 +4,7 @@
 
     <groupId>com.github.mikkoi</groupId>
     <artifactId>projects-maven-plugin</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
     <name>Projects Maven Plugin</name>
     <description>Plugin goals to help in managing Maven projects.</description>
