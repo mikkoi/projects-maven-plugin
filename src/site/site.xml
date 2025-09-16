@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site xmlns="http://maven.apache.org/SITE/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://maven.apache.org/SITE/2.0.0 https://maven.apache.org/xsd/site-2.0.0.xsd"
+      name="Projects Maven Plugin">
+
+    <skin>
+        <groupId>org.apache.maven.skins</groupId>
+        <artifactId>maven-fluido-skin</artifactId>
+        <version>2.1.0</version>
+    </skin>
+    <custom>
+        <fluidoSkin>
+            <profile>pre-release</profile>
+            <topBarEnabled>false</topBarEnabled>
+            <sideBarEnabled>true</sideBarEnabled>
+            <sourceLineNumbersEnabled>true</sourceLineNumbersEnabled>
+            <gitHub>
+                <projectId>github/mikkoi/projects-maven-plugin</projectId>
+                <ribbonOrientation>right</ribbonOrientation>
+                <ribbonColor>black</ribbonColor>
+            </gitHub>
+        </fluidoSkin>
+    </custom>
+
+    <body>
+        <menu name="Projects Maven Plugin">
+            <item name="Introduction" href="index.html"/>
+            <item name="Configuration" href="configuration.html"/>
+            <item name="Usage" href="usage.html"/>
+            <item name="License" href="https://www.apache.org/licenses/"/>
+        </menu>
+
+        <menu ref="project-information"/>
+        <menu ref="reports"/>
+
+    </body>
+</site>

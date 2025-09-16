@@ -1,0 +1,46 @@
+# Configuration
+
+Projects Maven Plugin `${project.artifactId}` has the following global (for all goals) configuration parameters:
+
+* `skip`
+
+Skip execution of any goal of this plugin. Default: false
+
+    <skip>true</skip>
+
+User property `projects.skip`.
+
+
+* `<includes>`
+
+Include these projects. Default: include every project.
+
+Example:
+
+    <includes>
+        <include>project-subroot-*</include>
+        <include>${project.groupId}:project-thing:war</include>
+    </includes>
+
+User property `projects.includes`.
+
+
+* `<excludes>`
+
+Exclude these projects. If both `<includes>` and `<excludes>` are defined,
+then `<includes>` are used to filter in, and then `<excludes>` are excluded from
+those already picked.
+
+    <excludes>
+        <exclude>project-excluded</exclude>
+        <exclude>${project.groupId}:project-subroot-*</exclude>
+        <exclude>${project.groupId}:project-thing:war</exclude>
+    </excludes>
+
+User property `projects.excludes`.
+
+* `forceStdout`
+
+Force output to STDOUT instead of using [INFO] logging level. Default: false
+
+User property: projects.forceStdout

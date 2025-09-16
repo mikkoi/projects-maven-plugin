@@ -1,0 +1,8 @@
+# Projects Maven Plugin
+
+# Introduction
+
+This is a Maven plugin to perform operations on all or a subset of projects in a multi-module build.
+It can be used to list projects, add dynamically during build dependencies to a (sub)project,
+or create a BOM (Bill Of Materials) project.
+It supports _includes_ and _excludes_ patterns to filter projects.

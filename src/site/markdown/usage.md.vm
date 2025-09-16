@@ -1,17 +1,3 @@
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Maven Central](https://img.shields.io/maven-central/v/com.github.mikkoi/projects-maven-plugin.svg)](https://mvnrepository.com/artifact/com.github.mikkoi/projects-maven-plugin)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=mikkoi_projects-maven-plugin&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=mikkoi_projects-maven-plugin)
-
-# Projects Maven Plugin
-
-# Introduction
-
-This is a Maven plugin to perform operations on all or a subset of projects in a multi-module build.
-It can be used to list projects, add dynamically during build dependencies to a (sub)project,
-or create a BOM (Bill Of Materials) project.
-It supports _includes_ and _excludes_ patterns to filter projects.
-
-
 # Usage
 
 Some goals are only runnable with a configuration in the POM file.
@@ -68,6 +54,7 @@ Example configuration:
             <plugin>
                 <groupId>com.github.mikkoi</groupId>
                 <artifactId>projects-maven-plugin</artifactId>
+                <version>${project.version}
                 <executions>
                     <execution>
                         <id>add-dependencies</id>
@@ -120,6 +107,7 @@ Example configuration:
             <plugin>
                 <groupId>com.github.mikkoi</groupId>
                 <artifactId>projects-maven-plugin</artifactId>
+                <version>${project.version}
                 <executions>
                     <execution>
                         <id>create-bom</id>
