@@ -9,10 +9,13 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ListMojoTest {
+/**
+ * Unit tests for ListMojo.
+ */
+class ListMojoTest {
 
     @Test
-    public void testIsIncluded() {
+    void testIsIncluded() {
         MavenProject project = new MavenProject();
 
         ListMojo mojo = new ListMojo();
@@ -31,7 +34,7 @@ public class ListMojoTest {
     }
 
     @Test
-    public void testFormatProject() {
+    void testFormatProject() {
         MavenProject project = new MavenProject();
         project.setGroupId("this.group.id-has-dashes");
         project.setArtifactId("this-artifact-id");
@@ -39,11 +42,14 @@ public class ListMojoTest {
         project.setDescription("This Artifact Description\n has two rows.");
         project.setVersion("1.2.3-DEBUG");
         project.setPackaging("ear");
-        project.setBasedir(new File("/this/base/dir"));
+        project.setFile(new File("/this/base/dir/pom.xml"));
 
         ListMojo mojo = new ListMojo();
 
         mojo.setPrintFormat("{groupId}:{artifactId}:{name}");
         assertThat(mojo.formatProject(project)).isEqualTo("this.group.id-has-dashes:this-artifact-id:This Artifact Name");
+
+        mojo.setPrintFormat("{artifactId}:{packaging}:{version}:{description}:{absPath}");
+        assertThat(mojo.formatProject(project)).isEqualTo("this-artifact-id:ear:1.2.3-DEBUG:This Artifact Description\n has two rows.:/this/base/dir");
     }
 }
