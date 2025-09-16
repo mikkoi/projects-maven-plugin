@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suppressions PUBLIC
         "-//Puppy Crawl//DTD Suppressions 1.1//EN"
-        "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
+        "https://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 <suppressions>
-    <!-- suppress all checks on all files in a package -->
-    <!--<suppress files="." checks=".*"/>-->
+    <!-- suppress all checks on the following files -->
+    <suppress files="target/generated-sources/plugin/com/github/mikkoi/projects_maven_plugin/HelpMojo.java" checks=".*"/>
 
     <!-- suppress certain checks on all files -->
     <suppress files="." checks="LineLengthCheck"/>
