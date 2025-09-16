@@ -22,6 +22,7 @@ public class ListMojo extends BaseMojo {
      * Default value: all projects included.
      * If includes list contains any items, they are evaluated first.
      * Then excludes are excluded from them.
+     * @param includes the includes
      */
     @Parameter(property = "projects" + ".list" + ".includes", alias = "includes")
     public void setIncludes(List<String> includes) {
@@ -32,6 +33,7 @@ public class ListMojo extends BaseMojo {
     /**
      * Exclude by project [groupId:]artifactId.
      * Default value: No projects excluded.
+     * @param excludes the excludes
      */
     @Parameter(property = "projects" + ".list" + ".excludes", alias = "excludes")
     public void setExcludes(List<String> excludes) {
@@ -47,6 +49,8 @@ public class ListMojo extends BaseMojo {
     private String printFormat;
     /**
      * Format for printing.
+     * Default value: {groupId}:{artifactId}:{packaging}
+     * @param printFormat the print format
      */
     @Parameter(property = "projects" + ".list" + ".printFormat", defaultValue = "{groupId}:{artifactId}:{packaging}")
     public void setPrintFormat(String printFormat) {
@@ -82,8 +86,8 @@ public class ListMojo extends BaseMojo {
     /**
      * Convert list of projects to a list of strings.
      *
-     * @param projects   List<MavenProject>
-     * @return String    List<String>, List of strings ready for writing out.
+     * @param projects   List of MavenProject objects.
+     * @return String    List of strings ready for writing out.
      */
     public List<String> list(List<MavenProject> projects) {
         getLog().debug("Begin of projects:");
@@ -122,6 +126,13 @@ public class ListMojo extends BaseMojo {
         return buf.toString();
     }
 
+    /**
+     * Format a single project to a string.
+     * Replaces {groupId}, {artifactId}, {name}, {description}, {version}, {absPath}, {packaging}.
+     *
+     * @param mavenProject MavenProject
+     * @return String formatted project
+     */
     public String formatProject(MavenProject mavenProject) {
         String s = this.printFormat;
         return replace(
@@ -140,6 +151,12 @@ public class ListMojo extends BaseMojo {
         );
     }
 
+    /**
+     * Decide if the project is included or excluded.
+     *
+     * @param mavenProject MavenProject
+     * @return true if included, false if excluded
+     */
     public boolean isIncluded(MavenProject mavenProject) {
         boolean r = MojoUtilities.isIncluded(this.includes, this.excludes, mavenProject);
         getLog().debug(String.format("isIncluded(%s:%s:%s:%s): %b", mavenProject.getGroupId(), mavenProject.getArtifactId(), mavenProject.getVersion(), mavenProject.getPackaging(), r));

@@ -77,8 +77,8 @@ public class AddInternalMojo extends BaseMojo {
     /**
      * Add internal projects to the current project's dependencies.
      *
-     * @param projects      List<MavenProject>
-     * @return strings      List of strings ready for writing out
+     * @param projects      List of MavenProject objects.
+     * @return strings      List of strings ready for writing out.
      */
     public List<String> addInternal(List<MavenProject> projects) {
         getLog().debug("Begin of projects:add-internal");
@@ -191,24 +191,12 @@ public class AddInternalMojo extends BaseMojo {
         return buf.toString();
     }
 
-    public String formatProject(MavenProject mavenProject) {
-        String s = this.printFormat;
-        return replace(
-                replace(
-                        replace(
-                                replace(
-                                        replace(
-                                                replace(
-                                                        replace(s, "{groupId}", mavenProject.getGroupId()),
-                                                        "{artifactId}", mavenProject.getArtifactId()
-                                                ), "{name}", mavenProject.getName()
-                                        ), "{description}", mavenProject.getDescription()
-                                ), "{version}", mavenProject.getVersion()
-                        ), "{absPath}", mavenProject.getBasedir().getAbsolutePath()
-                ), "{packaging}", mavenProject.getPackaging()
-        );
-    }
-
+    /**
+     * Decide if the project is included or excluded.
+     *
+     * @param mavenProject MavenProject
+     * @return true if included, false if excluded
+     */
     public boolean isIncluded(MavenProject mavenProject) {
         String projectGroupId = mavenProject.getGroupId();
         String projectArtifactId = mavenProject.getArtifactId();

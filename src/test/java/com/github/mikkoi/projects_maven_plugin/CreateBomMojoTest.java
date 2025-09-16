@@ -15,6 +15,9 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Unit tests for CreateBomMojo.
+ */
 class CreateBomMojoTest {
 
     @TempDir

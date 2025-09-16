@@ -7,6 +7,9 @@ import org.apache.maven.project.MavenProject;
 
 import java.util.List;
 
+/**
+ * Base class for Mojos.
+ */
 public abstract class BaseMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "${session}", readonly = true, required = true)

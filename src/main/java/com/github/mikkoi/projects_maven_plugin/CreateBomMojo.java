@@ -98,6 +98,7 @@ public class CreateBomMojo extends BaseMojo {
      * Default value: all projects included.
      * If includes list contains any items, they are evaluated first.
      * Then excludes are excluded from them.
+     * @param includes the includes
      */
     @Parameter(property = "projects" + ".createBom" + ".includes", alias = "includes")
     public void setIncludes(List<String> includes) {
@@ -108,6 +109,7 @@ public class CreateBomMojo extends BaseMojo {
     /**
      * Exclude by project [groupId:]artifactId.
      * Default value: No projects excluded.
+     * @param excludes the excludes
      */
     @Parameter(property = "projects" + ".createBom" + ".excludes", alias = "excludes")
     public void setExcludes(List<String> excludes) {
@@ -310,6 +312,12 @@ public class CreateBomMojo extends BaseMojo {
         getLog().debug(":End of createBom");
     }
 
+    /**
+     * Is the project included based on includes and excludes lists.
+     *
+     * @param mavenProject MavenProject
+     * @return true if included, false if excluded
+     */
     public boolean isIncluded(MavenProject mavenProject) {
         boolean r = MojoUtilities.isIncluded(this.includes, this.excludes, mavenProject);
         getLog().debug(String.format("isIncluded(%s:%s:%s:%s): %b", mavenProject.getGroupId(), mavenProject.getArtifactId(), mavenProject.getVersion(), mavenProject.getPackaging(), r));

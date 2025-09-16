@@ -7,6 +7,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
 
+/**
+ * Utility methods for Mojos.
+ */
 public class MojoUtilities {
 
     /**
@@ -60,6 +63,24 @@ public class MojoUtilities {
         return t;
     }
 
+    /**
+     * Is the project included based on includes and excludes lists.
+     * <p>
+     * The includes and excludes lists are lists of strings which are
+     * matched against the project id, which is groupId:artifactId:packaging.
+     * <p>
+     * The matching is done from the end of the string, so artifactId alone is enough.
+     * <p>
+     * The includes and excludes lists are processed in order, so the first match wins.
+     * <p>
+     * If includes is empty, then all projects are included.
+     * If excludes is empty, then no projects are excluded.
+     *
+     * @param includes      List of strings (project ids) to include
+     * @param excludes      List of strings (project ids) to exclude
+     * @param mavenProject MavenProject to check
+     * @return true if the project is included
+     */
     public static boolean isIncluded(List<String> includes, List<String> excludes, MavenProject mavenProject) {
         String projectId = String.format("%s:%s:%s", mavenProject.getGroupId(), mavenProject.getArtifactId(), mavenProject.getPackaging());
 

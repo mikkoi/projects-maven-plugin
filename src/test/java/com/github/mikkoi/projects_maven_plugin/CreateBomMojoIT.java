@@ -25,6 +25,9 @@ import java.nio.file.Paths;
 
 import static com.soebes.itf.extension.assertj.MavenITAssertions.assertThat;
 
+/**
+ * Integration tests for CreateBomMojo.
+ */
 @MavenJupiterExtension
 public class CreateBomMojoIT {
 

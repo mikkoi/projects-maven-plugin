@@ -16,6 +16,9 @@ import org.junit.jupiter.api.TestMethodOrder;
 
 import static com.soebes.itf.extension.assertj.MavenITAssertions.assertThat;
 
+/**
+ * Integration tests for AddInternalMojo.
+ */
 @MavenJupiterExtension
 public class AddInternalMojoIT {
 
