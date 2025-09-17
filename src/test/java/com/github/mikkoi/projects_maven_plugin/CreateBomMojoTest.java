@@ -33,7 +33,7 @@ class CreateBomMojoTest {
             assertThat(Files.exists(path)).isTrue();
             Files.delete(path);
         } catch (IOException e) {
-            assertThat(false).isTrue().describedAs("Test fails");
+            assertThat(e.getMessage()).as("Writing new POM file fails with exception: ").isNull();
         }
     }
 

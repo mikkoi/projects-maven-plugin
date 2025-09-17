@@ -171,10 +171,9 @@ public class CreateBomMojo extends BaseMojo {
             }
         } catch (IOException e) {
             throw new MojoExecutionException(
-                    bomFilepath,
-                    "Failure in parameter",
-                    String.format("Failure in parameter 'bomPath'. Cannot create path '%s'", Paths.get(bomFilepath))
-            );
+                    String.format("Failure in parameter 'bomPath'. Cannot create path '%s'. Error: %s",
+                            Paths.get(bomFilepath), e.getMessage()),
+                    e);
         }
 
         if("DEFAULT_TO_BE_REPLACED".equals(bomGroupId)) {
