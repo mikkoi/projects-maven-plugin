@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MojoUtilitiesTest {
 
     @Test
-    public void testConvertStringForMatching() {
+    void testConvertStringForMatching() {
         String name1 = MojoUtilities.convertStringForMatching("apache");
         assertThat(name1).isEqualTo(".*:apache:.*");
 
@@ -33,7 +33,7 @@ class MojoUtilitiesTest {
     }
 
     @Test
-    public void testIsIncluded() {
+    void testIsIncluded() {
         MavenProject project = new MavenProject();
 
         List<String> includes = new ArrayList<>();

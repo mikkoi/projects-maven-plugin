@@ -9,8 +9,13 @@ import java.util.function.Predicate;
 
 /**
  * Utility methods for Mojos.
+ * All methods are static.
  */
 public class MojoUtilities {
+
+    private MojoUtilities() {
+        // Utility class, prevent instantiation
+    }
 
     /**
      * Create a comparator which compares Maven project groupId and artifactId
@@ -19,7 +24,7 @@ public class MojoUtilities {
      * @param sortOrder "random" / "alphabetic"
      * @return the comparator
      */
-    static Comparator<MavenProject> getMavenProjectComparator(String sortOrder) {
+    public static Comparator<MavenProject> getMavenProjectComparator(String sortOrder) {
         Comparator<MavenProject> comparator;
         if ("maven".equals(sortOrder)) {
             comparator = (o1, o2) -> 0;

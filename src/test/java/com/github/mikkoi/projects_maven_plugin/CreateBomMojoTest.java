@@ -24,7 +24,7 @@ class CreateBomMojoTest {
     static Path tempDir;
 
     @Test
-    public void testWritePOMFile() {
+    void testWritePOMFile() {
         Model model = new Model();
         final Path path = Paths.get(tempDir.toString(), UUID.randomUUID().toString(), "pom.xml");
         try {
@@ -38,7 +38,7 @@ class CreateBomMojoTest {
     }
 
     @Test
-    public void testIsIncluded() {
+    void testIsIncluded() {
         MavenProject project = new MavenProject();
 
         CreateBomMojo mojo = new CreateBomMojo();
