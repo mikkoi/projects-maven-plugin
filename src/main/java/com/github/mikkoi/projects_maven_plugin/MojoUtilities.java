@@ -18,6 +18,11 @@ public class MojoUtilities {
     }
 
     /**
+     * Constant for string which is used to indicate a default value
+     * that has to be replaced when validating it.
+     */
+    public static final String REPLACE_ME_STRING = "DEFAULT_TO_BE_REPLACED";
+    /**
      * Create a comparator which compares Maven project groupId and artifactId
      * for alphabetical listing.
      *

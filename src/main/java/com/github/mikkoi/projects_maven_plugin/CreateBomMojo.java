@@ -20,6 +20,8 @@ import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
 
+import static com.github.mikkoi.projects_maven_plugin.MojoUtilities.REPLACE_ME_STRING;
+
 /**
  * Create a BOM POM from the current POM.
  * Remove all dependencies, profiles, build and properties from the current POM.
@@ -38,13 +40,13 @@ public class CreateBomMojo extends BaseMojo {
     /**
      * BOM path. Filepath to write the new pom.xml.
      */
-    @Parameter(property = "projects" + ".createBom" + ".bomFilepath", alias = "bomFilepath", defaultValue = "DEFAULT_TO_BE_REPLACED")
+    @Parameter(property = "projects" + ".createBom" + ".bomFilepath", alias = "bomFilepath", defaultValue = REPLACE_ME_STRING)
     String bomFilepath;
 
     /**
      * BOM file groupId.
      */
-    @Parameter(property = "projects" + ".createBom" + ".bomGroupId", alias = "bomGroupId", defaultValue = "DEFAULT_TO_BE_REPLACED")
+    @Parameter(property = "projects" + ".createBom" + ".bomGroupId", alias = "bomGroupId", defaultValue = REPLACE_ME_STRING)
     String bomGroupId;
 
     /**
@@ -56,7 +58,7 @@ public class CreateBomMojo extends BaseMojo {
     /**
      * BOM file version.
      */
-    @Parameter(property = "projects" + ".createBom" + ".bomVersion", alias = "bomVersion", defaultValue = "DEFAULT_TO_BE_REPLACED")
+    @Parameter(property = "projects" + ".createBom" + ".bomVersion", alias = "bomVersion", defaultValue = REPLACE_ME_STRING)
     String bomVersion;
 
     /**
@@ -91,6 +93,10 @@ public class CreateBomMojo extends BaseMojo {
     @Parameter(property = "projects" + ".createBom" + ".attachToCurrentProject", alias = "attachToCurrentProject", defaultValue = "false")
     boolean attachToCurrentProject;
 
+    /**
+     * Include by project [groupId:]artifactId.
+     * Default value: all projects included.
+     */
     private List<String> includes;
     /**
      * Include by project [groupId:]artifactId.
@@ -104,6 +110,12 @@ public class CreateBomMojo extends BaseMojo {
         this.includes = includes;
     }
 
+    /**
+     * Exclude by project [groupId:]artifactId.
+     * Default value: No projects excluded.
+     * If includes list contains any items, they are evaluated first.
+     * Then excludes are excluded from them.
+     */
     private List<String> excludes;
     /**
      * Exclude by project [groupId:]artifactId.
@@ -137,7 +149,7 @@ public class CreateBomMojo extends BaseMojo {
 
         for ( String a : includes ) {
             if (a == null) {
-                throw new MojoExecutionException(includes, "Failure in parameter", "Failure in parameter 'includes'. String is null");
+                throw new MojoExecutionException("Failure in parameter 'includes'. String is null");
             }
         }
         if (includes.isEmpty()) {
@@ -146,19 +158,19 @@ public class CreateBomMojo extends BaseMojo {
 
         for ( String a : excludes ) {
             if (a == null) {
-                throw new MojoExecutionException(excludes, "Failure in parameter", "Failure in parameter 'excludes'. String is null");
+                throw new MojoExecutionException("Failure in parameter 'excludes'. String is null");
             }
         }
 
         if(! ("maven".equals(sortOrder) || "alphabetical".equals(sortOrder))) {
-            throw new MojoExecutionException(sortOrder, "Failure in parameter", "Failure in parameter 'sortOrder'. Allowed values: 'maven', 'alphabetical'.");
+            throw new MojoExecutionException("Failure in parameter 'sortOrder'. Allowed values: 'maven', 'alphabetical'.");
         }
 
-        if("DEFAULT_TO_BE_REPLACED".equals(bomFilepath)) {
+        if(REPLACE_ME_STRING.equals(bomFilepath)) {
             // Replace with default: target/bom/pom.xml
             bomFilepath = mavenSession.getCurrentProject().getBuild().getDirectory() + "/bom/pom.xml";
         } else if (bomFilepath.isEmpty()) {
-            throw new MojoExecutionException(bomFilepath, "Failure in parameter", "Failure in parameter 'bomPath'. String is null");
+            throw new MojoExecutionException("Failure in parameter 'bomPath'. String is null");
         }
 
         // Validate bomPath
@@ -175,11 +187,11 @@ public class CreateBomMojo extends BaseMojo {
                     e);
         }
 
-        if("DEFAULT_TO_BE_REPLACED".equals(bomGroupId)) {
+        if(REPLACE_ME_STRING.equals(bomGroupId)) {
             bomGroupId = mavenSession.getCurrentProject().getGroupId();
         }
 
-        if("DEFAULT_TO_BE_REPLACED".equals(bomVersion)) {
+        if(REPLACE_ME_STRING.equals(bomVersion)) {
             bomVersion = mavenSession.getCurrentProject().getVersion();
         }
 
