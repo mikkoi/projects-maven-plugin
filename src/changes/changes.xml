@@ -6,7 +6,9 @@
         <author email="mikko.koivunalho@iki.fi">Mikko Koivunalho</author>
     </properties>
     <body>
-        <release version="0.0.6" date="2025-12-31" description="Subsequent patch release while moving towards version 1.0.0">
+        <release version="0.0.7" date="2025-12-31" description="Subsequent patch release while moving towards version 1.0.0">
+        </release>
+        <release version="0.0.6" date="2025-11-09" description="Subsequent patch release while moving towards version 1.0.0">
             <action dev="mikkoi" type="add" date="2025-11-09">
                 Clear Checkstyle errors and add code coverage.
             </action>
