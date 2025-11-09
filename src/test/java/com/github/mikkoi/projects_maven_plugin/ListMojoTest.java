@@ -15,6 +15,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ListMojoTest {
 
     @Test
+    void testToString() {
+        ListMojo mojo = new ListMojo();
+        assertThat(mojo.toString()).isEqualTo("ListMojo{includes=null, excludes=null, sortOrder='null', printFormat='null'}");
+
+        mojo.setSortOrder("alphabetic");
+        mojo.setPrintFormat("{name} - {version}");
+        mojo.setIncludes(new ArrayList<>());
+        mojo.setExcludes(new ArrayList<>());
+        assertThat(mojo.toString()).isEqualTo("ListMojo{includes=[], excludes=[], sortOrder='alphabetic', printFormat='{name} - {version}'}");
+    }
+
+    @Test
     void testIsIncluded() {
         MavenProject project = new MavenProject();
 
@@ -26,6 +38,7 @@ class ListMojoTest {
 
         // This is what CreateBomMojo.validateParameters would do:
         includes.add("*");
+        mojo.setIncludes(includes);
         project.setGroupId("com.github.mikkoi");
         project.setArtifactId("test-artifact");
         project.setPackaging("jar");
