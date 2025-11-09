@@ -4,7 +4,7 @@
 
     <groupId>com.github.mikkoi</groupId>
     <artifactId>projects-maven-plugin</artifactId>
-    <version>0.0.6</version>
+    <version>0.0.7-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
     <name>Projects Maven Plugin</name>
     <description>Plugin goals to help in managing Maven projects.</description>
@@ -23,7 +23,7 @@
     <scm>
         <connection>scm:git:${project.scm.url}</connection>
         <developerConnection>scm:git:${project.scm.url}</developerConnection>
-        <tag>projects-maven-plugin-0.0.6</tag>
+        <tag>HEAD</tag>
         <url>https://github.com/mikkoi/projects-maven-plugin.git</url>
     </scm>
 
