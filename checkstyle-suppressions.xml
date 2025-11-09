@@ -15,4 +15,9 @@
     <!--<suppress files="." checks="JavadocMethod"/>-->
     <!--<suppress files="." checks="HiddenField"/>-->
     <suppress files="." checks="AvoidInlineConditionals"/>
+    <suppress files="." checks="FinalParameters"/>
+    <suppress files="." checks="HiddenField"/>
+
+    <!-- suppress TypeName checks on IT files, tolerate class 'set_001' -->
+    <suppress files=".*IT.java" checks="TypeName"/>
 </suppressions>

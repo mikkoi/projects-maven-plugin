@@ -66,7 +66,7 @@ public class ListMojo extends BaseMojo {
         getLog().debug("excludes=" + excludes);
         getLog().debug("sortOrder=" + sortOrder);
 
-        for ( String a : includes ) {
+        for (String a : includes) {
             if (a == null) {
                 throw new MojoExecutionException(includes, "Failure in parameter", "Failure in parameter 'includes'. String is null");
             }
@@ -75,7 +75,7 @@ public class ListMojo extends BaseMojo {
             includes.add("*");
         }
 
-        for ( String a : excludes ) {
+        for (String a : excludes) {
             if (a == null) {
                 throw new MojoExecutionException(excludes, "Failure in parameter", "Failure in parameter 'excludes'. String is null");
             }

@@ -41,12 +41,16 @@ public class CreateBomMojoIT {
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class set_001 {
 
+        /**
+         * Number of projects in the test Maven build.
+         */
         private final int NUMBER_OF_PROJECTS_IN_BUILD = 6; // Including root
+
         // Create bom with all the projects in the build (set-001)
         // Default settings
         @MavenTest
         @Order(1)
-        void the_first_test_case(MavenExecutionResult result) {
+        void the_first_test_case(final MavenExecutionResult result) {
             assertThat(result).isSuccessful();
             Path bomPath = Paths.get(result.getMavenProjectResult().getTargetProjectDirectory().toString(), "target", "bom", "pom.xml");
             assertThat(Files.exists(bomPath)).isTrue();
@@ -89,7 +93,7 @@ public class CreateBomMojoIT {
         @SystemProperty(value = "projects.createBom.bomVersion", content = "123")
         @SystemProperty(value = "projects.createBom.bomName", content = "BOM file for project")
         @Order(2)
-        void the_second_test_case(MavenExecutionResult result) {
+        void the_second_test_case(final MavenExecutionResult result) {
             assertThat(result).isSuccessful();
             Path bomPath = Paths.get(result.getMavenProjectResult().getTargetProjectDirectory().toString(), "target", "bom-case-002", "pom.xml");
             assertThat(Files.exists(bomPath)).isTrue();
@@ -116,7 +120,7 @@ public class CreateBomMojoIT {
         @SystemProperty(value = "projects.createBom.bomArtifactId", content = "bom")
         @SystemProperty(value = "projects.createBom.bomVersion", content = "TODAY")
         @Order(3)
-        void the_third_test_case(MavenExecutionResult result) {
+        void the_third_test_case(final MavenExecutionResult result) {
             assertThat(result).isSuccessful();
             Path bomPath = Paths.get(result.getMavenProjectResult().getTargetProjectDirectory().toString(), "target", "bom-case-003", "pom.xml");
             assertThat(Files.exists(bomPath)).isTrue();
@@ -154,7 +158,7 @@ public class CreateBomMojoIT {
         @SystemProperty(value = "projects.createBom.bomVersion", content = "TODAY")
         @SystemProperty(value = "projects.createBom.bomName", content = "BOM TODAY")
         @Order(4)
-        void the_fourth_test_case(MavenExecutionResult result) {
+        void the_fourth_test_case(final MavenExecutionResult result) {
             assertThat(result).isSuccessful();
             Path bomPath = Paths.get(result.getMavenProjectResult().getTargetProjectDirectory().toString(), "target", "bom-case-004", "pom.xml");
             assertThat(Files.exists(bomPath)).isTrue();
@@ -185,7 +189,7 @@ public class CreateBomMojoIT {
 
     }
 
-    private Dependency getRootProjectAsDependency(MavenExecutionResult result) {
+    private Dependency getRootProjectAsDependency(final MavenExecutionResult result) {
         final Dependency rootProject = new Dependency();
         rootProject.setType(result.getMavenProjectResult().getModel().getPackaging());
         rootProject.setGroupId(result.getMavenProjectResult().getModel().getGroupId());

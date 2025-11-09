@@ -11,7 +11,7 @@ import java.util.function.Predicate;
  * Utility methods for Mojos.
  * All methods are static.
  */
-public class MojoUtilities {
+public final class MojoUtilities {
 
     private MojoUtilities() {
         // Utility class, prevent instantiation
