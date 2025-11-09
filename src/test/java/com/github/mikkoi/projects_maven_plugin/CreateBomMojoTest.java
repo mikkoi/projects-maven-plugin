@@ -20,8 +20,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class CreateBomMojoTest {
 
+    /**
+     * Temporary directory for file writing tests.
+     */
     @TempDir
-    static Path tempDir;
+    private static Path tempDir;
 
     @Test
     void testWritePOMFile() {

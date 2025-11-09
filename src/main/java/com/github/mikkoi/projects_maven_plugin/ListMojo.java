@@ -7,6 +7,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
@@ -16,7 +17,11 @@ import java.util.List;
 @Mojo(name = "list", defaultPhase = LifecyclePhase.NONE, aggregator = true)
 public class ListMojo extends BaseMojo {
 
-    private List<String> includes;
+    /**
+     * Include by project [groupId:]artifactId.
+     */
+    private Collection<String> includes;
+
     /**
      * Include by project [groupId:]artifactId.
      * Default value: all projects included.
@@ -25,28 +30,46 @@ public class ListMojo extends BaseMojo {
      * @param includes the includes
      */
     @Parameter(property = "projects" + ".list" + ".includes", alias = "includes")
-    public void setIncludes(List<String> includes) {
-        this.includes = includes;
+    public void setIncludes(Collection<String> includes) {
+        this.includes = new ArrayList<>(includes);
     }
 
-    private List<String> excludes;
+    /*
+     * Exclude by project [groupId:]artifactId.
+     */
+    private Collection<String> excludes;
+
     /**
      * Exclude by project [groupId:]artifactId.
      * Default value: No projects excluded.
      * @param excludes the excludes
      */
     @Parameter(property = "projects" + ".list" + ".excludes", alias = "excludes")
-    public void setExcludes(List<String> excludes) {
-        this.excludes = excludes;
+    public void setExcludes(Collection<String> excludes) {
+        this.excludes = new ArrayList<>(excludes);
     }
 
     /**
-     * Sorting order: maven | alphabetic, default: maven
+     * Sorting order.
+     */
+    private String sortOrder;
+
+    /**
+     * Sorting order.
+     * Valid values: maven | alphabetic
+     * Default: maven
+     * @param sortOrder the sort order
      */
     @Parameter(property = "projects" + ".list" + ".sortOrder", defaultValue = "maven")
-    String sortOrder;
+    public void setSortOrder(String sortOrder) {
+        this.sortOrder = sortOrder;
+    }
 
+    /**
+     * Format for printing.
+     */
     private String printFormat;
+
     /**
      * Format for printing.
      * Default value: {groupId}:{artifactId}:{packaging}
@@ -66,7 +89,7 @@ public class ListMojo extends BaseMojo {
         getLog().debug("excludes=" + excludes);
         getLog().debug("sortOrder=" + sortOrder);
 
-        for ( String a : includes ) {
+        for (String a : includes) {
             if (a == null) {
                 throw new MojoExecutionException(includes, "Failure in parameter", "Failure in parameter 'includes'. String is null");
             }
@@ -75,7 +98,7 @@ public class ListMojo extends BaseMojo {
             includes.add("*");
         }
 
-        for ( String a : excludes ) {
+        for (String a : excludes) {
             if (a == null) {
                 throw new MojoExecutionException(excludes, "Failure in parameter", "Failure in parameter 'excludes'. String is null");
             }
@@ -117,7 +140,8 @@ public class ListMojo extends BaseMojo {
         }
 
         StringBuilder buf = new StringBuilder(text.length());
-        int start = 0, end;
+        int start = 0;
+        int end;
         while ((end = text.indexOf(repl, start)) != -1) {
             buf.append(text, start, end).append(with);
             start = end + repl.length();
@@ -185,4 +209,16 @@ public class ListMojo extends BaseMojo {
         printOut(this.list(projects));
     }
 
+    /**
+     * String representation of the mojo.
+     */
+    @Override
+    public String toString() {
+        return "ListMojo{"
+                + "includes=" + includes
+                + ", excludes=" + excludes
+                + ", sortOrder='" + sortOrder + '\''
+                + ", printFormat='" + printFormat + '\''
+                + '}';
+    }
 }

@@ -12,6 +12,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -147,7 +148,7 @@ public class CreateBomMojo extends BaseMojo {
         getLog().debug("bomVersion=" + bomVersion);
         getLog().debug("bomName=" + bomName);
 
-        for ( String a : includes ) {
+        for (String a : includes) {
             if (a == null) {
                 throw new MojoExecutionException("Failure in parameter 'includes'. String is null");
             }
@@ -156,17 +157,17 @@ public class CreateBomMojo extends BaseMojo {
             includes.add("*");
         }
 
-        for ( String a : excludes ) {
+        for (String a : excludes) {
             if (a == null) {
                 throw new MojoExecutionException("Failure in parameter 'excludes'. String is null");
             }
         }
 
-        if(! ("maven".equals(sortOrder) || "alphabetical".equals(sortOrder))) {
+        if (! ("maven".equals(sortOrder) || "alphabetical".equals(sortOrder))) {
             throw new MojoExecutionException("Failure in parameter 'sortOrder'. Allowed values: 'maven', 'alphabetical'.");
         }
 
-        if(REPLACE_ME_STRING.equals(bomFilepath)) {
+        if (REPLACE_ME_STRING.equals(bomFilepath)) {
             // Replace with default: target/bom/pom.xml
             bomFilepath = mavenSession.getCurrentProject().getBuild().getDirectory() + "/bom/pom.xml";
         } else if (bomFilepath.isEmpty()) {
@@ -187,11 +188,11 @@ public class CreateBomMojo extends BaseMojo {
                     e);
         }
 
-        if(REPLACE_ME_STRING.equals(bomGroupId)) {
+        if (REPLACE_ME_STRING.equals(bomGroupId)) {
             bomGroupId = mavenSession.getCurrentProject().getGroupId();
         }
 
-        if(REPLACE_ME_STRING.equals(bomVersion)) {
+        if (REPLACE_ME_STRING.equals(bomVersion)) {
             bomVersion = mavenSession.getCurrentProject().getVersion();
         }
 
@@ -286,7 +287,7 @@ public class CreateBomMojo extends BaseMojo {
         getLog().debug(String.format("model.getDependencyManagement=%s", model.getDependencyManagement()));
         model.setDependencyManagement(new DependencyManagement());
 
-        if(includeProjects) {
+        if (includeProjects) {
             final List<MavenProject> projects = mavenSession.getProjects();
             Comparator<MavenProject> comparator = getMavenProjectComparator(this.sortOrder);
             projects.stream().filter(this::isIncluded).sorted(comparator).forEach(mavenProject -> {
@@ -307,12 +308,12 @@ public class CreateBomMojo extends BaseMojo {
             getLog().error(String.format("Cannot write POM %s", this.bomFilepath), e);
         }
 
-        if(attachToCurrentProject) {
+        if (attachToCurrentProject) {
             final Model currentModel = currentProject.getOriginalModel();
             final List<String> modules = currentModel.getModules();
             modules.add(this.bomFilepath);
-            java.io.File modelFile = currentModel.getPomFile();
-            java.nio.file.Path p = Paths.get(modelFile.getAbsolutePath());
+            File modelFile = currentModel.getPomFile();
+            Path p = Paths.get(modelFile.getAbsolutePath());
             try {
                 writePOM(p, currentModel);
             } catch (IOException e) {

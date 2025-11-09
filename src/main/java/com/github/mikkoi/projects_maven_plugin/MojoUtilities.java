@@ -3,15 +3,15 @@ package com.github.mikkoi.projects_maven_plugin;
 import org.apache.maven.project.MavenProject;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
-import java.util.List;
 import java.util.function.Predicate;
 
 /**
  * Utility methods for Mojos.
  * All methods are static.
  */
-public class MojoUtilities {
+public final class MojoUtilities {
 
     private MojoUtilities() {
         // Utility class, prevent instantiation
@@ -91,7 +91,7 @@ public class MojoUtilities {
      * @param mavenProject MavenProject to check
      * @return true if the project is included
      */
-    public static boolean isIncluded(List<String> includes, List<String> excludes, MavenProject mavenProject) {
+    public static boolean isIncluded(Collection<String> includes, Collection<String> excludes, MavenProject mavenProject) {
         String projectId = String.format("%s:%s:%s", mavenProject.getGroupId(), mavenProject.getArtifactId(), mavenProject.getPackaging());
 
         // Match from the end of the id, artifactId alone is enough.
