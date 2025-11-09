@@ -87,7 +87,7 @@
         <!-- Dependencies (Non-Maven) -->
         <org.junit.jupiter.version>5.12.1</org.junit.jupiter.version>
         <org.assertj.version>3.27.3</org.assertj.version>
-        <central-publishing>0.8.0</central-publishing>
+        <central-publishing>0.9.0</central-publishing>
 
         <!-- Dependencies and Plugins (Non-Maven) -->
         <itf.version>0.13.1</itf.version>
@@ -95,11 +95,11 @@
         <!-- Plugins (Non-Maven) -->
         <error-prone.version>2.41.0</error-prone.version>
         <sisu.version>0.9.0.M4</sisu.version>
-        <jacoco.version>0.8.13</jacoco.version>
-        <spotbugs.version>4.9.3.0</spotbugs.version>
+        <jacoco.version>0.8.14</jacoco.version>
+        <spotbugs.version>4.9.8.1</spotbugs.version>
         <spotbugs.plugin.fb-contrib.version>7.6.10</spotbugs.plugin.fb-contrib.version>
         <spotbugs.plugin.find-sec-bugs.version>1.13.0</spotbugs.plugin.find-sec-bugs.version>
-        <spotbugs-annotations.version>4.9.4</spotbugs-annotations.version>
+        <spotbugs-annotations.version>4.9.8</spotbugs-annotations.version>
 
         <!-- Sonar -->
         <sonar.token>REPLACE_ME_WHEN_BUILDING</sonar.token>
