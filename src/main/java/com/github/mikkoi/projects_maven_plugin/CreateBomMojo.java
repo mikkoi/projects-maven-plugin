@@ -12,6 +12,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -311,8 +312,8 @@ public class CreateBomMojo extends BaseMojo {
             final Model currentModel = currentProject.getOriginalModel();
             final List<String> modules = currentModel.getModules();
             modules.add(this.bomFilepath);
-            java.io.File modelFile = currentModel.getPomFile();
-            java.nio.file.Path p = Paths.get(modelFile.getAbsolutePath());
+            File modelFile = currentModel.getPomFile();
+            Path p = Paths.get(modelFile.getAbsolutePath());
             try {
                 writePOM(p, currentModel);
             } catch (IOException e) {

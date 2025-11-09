@@ -8,6 +8,9 @@
     <body>
         <release version="0.0.6" date="2025-12-31" description="Subsequent patch release while moving towards version 1.0.0">
             <action dev="mikkoi" type="add" date="2025-11-09">
+                Remove fully qualified name and import instead.
+            </action>
+            <action dev="mikkoi" type="add" date="2025-11-09">
                 Move site skin from pre-release profile to production profile. Removes pre-release "watermark".
             </action>
             <action dev="mikkoi" type="update" date="2025-09-16">
