@@ -1,4 +1,4 @@
-name: Workflow for Codecov example-java-maven
+name: CI
 on: [push, pull_request]
 jobs:
   run:
@@ -19,11 +19,11 @@ jobs:
         # env:
         #   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
-          report_type: "coverage"
+          report_type: coverage
           token: ${{ secrets.CODECOV_TOKEN }}
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
         uses: codecov/codecov-action@v6
         with:
-          report-type: "test_results"
+          report_type: test_results
           token: ${{ secrets.CODECOV_TOKEN }}
