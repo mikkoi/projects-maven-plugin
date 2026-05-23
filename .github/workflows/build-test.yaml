@@ -52,6 +52,19 @@ jobs:
               -Dsonar.token="${SONAR_TOKEN}"                                   \
               org.sonarsource.scanner.maven:sonar-maven-plugin:sonar           \
           && true
+      - id: report-coverage-to-codecov
+        name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v6
+        with:
+          report_type: coverage
+          token: ${{ secrets.CODECOV_TOKEN }}
+      - id: report-test-results-to-codecov
+        name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v6
+        with:
+          report_type: test_results
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
       #- name: Update dependency graph

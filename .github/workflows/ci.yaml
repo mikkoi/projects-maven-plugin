@@ -13,7 +13,14 @@ jobs:
       - name: Install dependencies
         run: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
       - name: Run tests and collect coverage
-        run: mvn -B test
+        shell: bash
+        run: |
+          mvn                                                                  \
+              --batch-mode                                                     \
+              --file pom.xml                                                   \
+              -V                                                               \
+              install                                                          \
+            && true
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v6
         # env:
